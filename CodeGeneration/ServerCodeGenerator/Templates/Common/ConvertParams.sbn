@@ -1,0 +1,12 @@
+﻿{{- $class_name = model_name + "sConvertParams" -}}
+
+namespace Common.ConvertParams;
+
+public sealed class {{ $class_name }}
+{
+{{~ for property in properties ~}}
+{{~ if property.is_navigation ~}}
+    public bool Include{{ property.name }} { get; set; }
+{{~ end ~}}
+{{~ end ~}}
+}

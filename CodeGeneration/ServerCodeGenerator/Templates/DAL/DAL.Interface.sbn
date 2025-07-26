@@ -1,0 +1,15 @@
+﻿{{- $class_name = "I" + model_name + "sDAL" -}}
+{{- $entity_model = "Entities." + model_name -}}
+{{- $db_model = "DbModels." + model_name -}}
+{{- $search_params = model_name + "sSearchParams" -}}
+{{- $convert_params = model_name + "sConvertParams" -}}
+
+using Common.ConvertParams;
+using Common.SearchParams;
+using DAL.Interfaces.Core;
+
+namespace DAL.Interfaces;
+
+public interface {{ $class_name }} : IBaseDAL<{{ $db_model }}, {{ $entity_model }}, {{ id_type }}, {{ $search_params }}, {{ $convert_params }}>
+{
+}

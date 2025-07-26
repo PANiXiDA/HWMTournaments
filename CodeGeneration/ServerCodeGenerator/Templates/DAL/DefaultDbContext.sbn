@@ -1,0 +1,12 @@
+﻿using DAL.DbModels;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace DAL.EF;
+
+public class DefaultDbContext : DbContext, IDataProtectionKeyContext
+{
+    public DefaultDbContext(DbContextOptions<DefaultDbContext> options) : base(options) { }
+
+    public virtual DbSet<{{ model_name }}> {{ model_name }}s { get; set; }
+}

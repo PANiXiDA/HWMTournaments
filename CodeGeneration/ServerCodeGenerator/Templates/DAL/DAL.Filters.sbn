@@ -1,0 +1,19 @@
+﻿{{- $class_name = model_name + "sFilters" -}}
+{{- $db_model = "DbModels." + model_name -}}
+{{- $search_params = model_name + "sSearchParams" -}}
+
+using Common.SearchParams;
+
+namespace DAL.Implementations.Filters;
+
+internal static class {{ $class_name }}
+{
+    internal static IQueryable<{{ $db_model }}> Filter(this IQueryable<{{ $db_model }}> dbObjects, {{ $search_params }} searchParams)
+    {
+    {{~ if filters != "" ~}}
+        {{ filters }}
+
+    {{~ end ~}}
+        return dbObjects;
+    }
+}

@@ -1,0 +1,77 @@
+﻿{{- $class_name = model_name + "sController" -}}
+{{- $model_name = model_name + "Model" -}}
+{{- $search_params = model_name + "sSearchParams" -}}
+{{- $convert_params = model_name + "sConvertParams?" -}}
+{{- $bl_interface_name = "I" + model_name + "sBL" -}}
+{{- $bl_parameter_name  = model_camel_name + "sBL" -}}
+{{- $bl_name = "_" + $bl_parameter_name -}}
+
+using System.Threading.Tasks;
+using BL.Interfaces;
+using Common.ConvertParams;
+using Common.SearchParams;
+using Dev.Template.AspNetCore.API.Controllers.Core;
+using Dev.Template.AspNetCore.API.Infrastructure.Core;
+using Dev.Template.AspNetCore.API.Infrastructure.Models;
+using Dev.Template.AspNetCore.API.Infrastructure.Models.Core;
+using Dev.Template.AspNetCore.API.Infrastructure.Responses.Core;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Dev.Template.AspNetCore.Api.Controllers;
+
+[Route("api/v1/{{ model_camel_name }}s")]
+public sealed class {{ $class_name }} : BaseApiController
+{
+    private readonly {{ $bl_interface_name }} {{ $bl_name }};
+
+    public {{ $class_name }}({{ $bl_interface_name }} {{ $bl_parameter_name }})
+    {
+        {{ $bl_name }} = {{ $bl_parameter_name }};
+    }
+
+    [HttpGet]
+    [Route("{id:{{ id_type }}}")]
+    [ProducesResponseType(typeof(RestApiResponse<{{ $model_name }}>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<RestApiResponse<{{ $model_name }}>>> Get([FromRoute] {{ id_type }} id, [FromQuery] {{ $convert_params }} convertParams)
+    {
+        var response = {{ $model_name }}.FromEntity(await {{ $bl_name }}.GetAsync(id));
+        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<{{ $model_name }}>.Success(response));
+    }
+
+    [HttpGet]
+    [ProducesResponseType(typeof(RestApiResponse<SearchResultViewModel<{{ $model_name }}>>), StatusCodes.Status200OK)]
+    [Route("get-by-filter")]
+    public async Task<ActionResult<RestApiResponse<SearchResultViewModel<{{ $model_name }}>>>> Get([FromQuery] {{ $search_params }} searchParams, [FromQuery] {{ $convert_params }} convertParams)
+    {
+        var searchResult = await {{ $bl_name }}.GetAsync(searchParams, convertParams);
+        var viewModel = new SearchResultViewModel<{{ $model_name }}>({{ $model_name }}.FromEntitiesList(searchResult.Objects), searchResult.Total);
+        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<SearchResultViewModel<{{ $model_name }}>>.Success(viewModel));
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(RestApiResponse<{{ id_type }}>), StatusCodes.Status201Created)]
+    public async Task<ActionResult<RestApiResponse<{{ id_type }}>>> Create([FromBody] {{ $model_name }} request)
+    {
+        request.Id = await {{ $bl_name }}.AddOrUpdateAsync({{ $model_name }}.ToEntity(request));
+        return StatusCode(StatusCodes.Status201Created, RestApiResponseBuilder<{{ id_type }}>.Success(request.Id));
+    }
+
+    [HttpPut]
+    [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<RestApiResponse<NoContent>>> Update([FromBody] {{ $model_name }} request)
+    {
+        await {{ $bl_name }}.AddOrUpdateAsync({{ $model_name }}.ToEntity(request));
+        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<NoContent>.Success(new NoContent()));
+    }
+
+    [HttpDelete]
+    [Route("{id:int}")]
+    [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status204NoContent)]
+    public async Task<ActionResult<RestApiResponse<NoContent>>> Delete([FromRoute] {{ id_type }} id)
+    {
+        await {{ $bl_name }}.DeleteAsync(id);
+        return StatusCode(StatusCodes.Status204NoContent, RestApiResponseBuilder<NoContent>.Success(new NoContent()));
+    }
+}

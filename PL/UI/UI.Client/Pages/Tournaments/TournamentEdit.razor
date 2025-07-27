@@ -2,6 +2,7 @@
 @page "/tournaments/update/{TournamentId:int}"
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject NotificationService Notifier
 
 <PageTitle>@(_isEdit ? "Редактировать турнир" : "Создать турнир")</PageTitle>
 
@@ -9,7 +10,7 @@
     @(_isEdit ? "Редактирование" : "Создание") турнира
 </h2>
 
-<EditForm Model="_tournament" OnValidSubmit="HandleValidSubmit">
+<EditForm Model="_tournament" OnValidSubmit="HandleValidSubmit" FormName="TournamentForm">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -98,16 +99,33 @@
 
     private async Task HandleValidSubmit()
     {
-        if (_isEdit)
-        {
-            await Http.PutAsJsonAsync("api/v1/tournaments", _tournament);
-        }
-        else
-        {
-            await Http.PostAsJsonAsync("api/v1/tournaments", _tournament);
-        }
+        _tournament.StartDate = DateTime.SpecifyKind(_tournament.StartDate, DateTimeKind.Utc);
 
-        Navigation.NavigateTo("/tournaments");
+        try
+        {
+            int returnedId;
+            if (_isEdit)
+            {
+                var putResp = await Http.PutAsJsonAsync($"api/v1/tournaments/{TournamentId}", _tournament);
+                putResp.EnsureSuccessStatusCode();
+                returnedId = TournamentId!.Value;
+            }
+            else
+            {
+                var postResp = await Http.PostAsJsonAsync("api/v1/tournaments", _tournament);
+                postResp.EnsureSuccessStatusCode();
+                var wrapper = await postResp.Content.ReadFromJsonAsync<RestApiResponse<int>>();
+                returnedId = wrapper?.Payload ?? throw new InvalidOperationException("Не удалось получить ID");
+            }
+
+            Navigation.NavigateTo($"/tournaments/update/{returnedId}");
+
+            _ = Notifier.NotifyAsync(_isEdit ? "Турнир успешно сохранён" : "Турнир успешно создан", isError: false);
+        }
+        catch (Exception ex)
+        {
+            _ = Notifier.NotifyAsync($"Ошибка при сохранении: {ex.Message}", isError: true);
+        }
     }
 
     private void Cancel() => Navigation.NavigateTo("/tournaments");

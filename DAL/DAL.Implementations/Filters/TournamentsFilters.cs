@@ -15,6 +15,8 @@ internal static class TournamentsFilters
             dbObjects = dbObjects.Where(item => item.Format == searchParams.Format.Value);
         }
 
+        dbObjects = dbObjects.OrderByDescending(item => item.StartDate);
+
         return dbObjects;
     }
 }

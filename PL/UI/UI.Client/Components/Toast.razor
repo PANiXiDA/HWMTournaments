@@ -1,0 +1,60 @@
+﻿@inject NotificationService Notifier
+@implements IDisposable
+
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:2000">
+    @if (_visible)
+    {
+        <div class="toast show @(_current.IsError ? "bg-danger text-white" : "bg-success text-white")">
+            <div class="toast-header">
+                <strong class="me-auto">@(_current.IsError ? "Ошибка" : "Успех")</strong>
+                <button type="button" class="btn-close btn-close-white" @onclick="Hide"></button>
+            </div>
+            <div class="toast-body">@_current.Message</div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool _visible;
+    private NotificationMessage _current = new();
+    private CancellationTokenSource? _cts;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Notifier.OnNotify += ShowAsync;
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task ShowAsync(NotificationMessage msg)
+    {
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        _current = msg;
+        _visible = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            await Task.Delay(3000, _cts.Token);
+        }
+        catch (OperationCanceledException) { }
+
+        if (_cts?.IsCancellationRequested == true) return;
+
+        _visible = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void Hide()
+    {
+        _cts?.Cancel();
+        _visible = false;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() => Notifier.OnNotify -= ShowAsync;
+}

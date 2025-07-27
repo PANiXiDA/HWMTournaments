@@ -1,6 +1,8 @@
-using DAL.DependencyInjection;
 using BL.DependencyInjection;
 
+using DAL.DependencyInjection;
+
+using UI.Client.Services;
 using UI.Server.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,8 @@ builder.Services.UseDAL(builder.Configuration);
 builder.Services.UseBL();
 
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<NotificationService>();
 
 builder.Services.AddHttpClient("ServerAPI", client =>
 {

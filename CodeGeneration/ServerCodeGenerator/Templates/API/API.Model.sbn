@@ -5,7 +5,7 @@
   {{- end -}}
 {{- end -}}
 
-{{- $class_name = model_name + "Model" -}}
+{{- $class_name = model_name + "DTO" -}}
 {{- $entity_model = "Entities." + model_name -}}
 
 {{- $need_line_break = false -}}
@@ -14,16 +14,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Common.Enums;
-using Dev.Template.AspNetCore.API.Infrastructure.Models.Core;
+using DTOs.Models.Core;
 
-namespace Dev.Template.AspNetCore.API.Infrastructure.Models;
+namespace DTOs.Models;
 
-public sealed class {{ $class_name }} : BaseModel<{{ id_type }}>
+public sealed class {{ $class_name }} : BaseDTO<{{ id_type }}>
 {
 {{~ for property in properties ~}}
 {{~ if !property.is_navigation && !property.is_collection ~}}
 {{~ $need_line_break = true ~}}
-    public required {{ property.type }} {{ property.name }} { get; set; }
+    public {{ property.type }} {{ property.name }} { get; set; } = default!;
 {{~ end ~}}
 {{~ end ~}}
 {{~ if $need_line_break ~}}
@@ -33,7 +33,7 @@ public sealed class {{ $class_name }} : BaseModel<{{ id_type }}>
 {{~ for property in properties ~}}
 {{~ if !property.is_navigation && property.is_collection ~}}
 {{~ $need_line_break = true ~}}
-    public required {{ property.type }} {{ property.name }} { get; set; } = [];
+    public {{ property.type }} {{ property.name }} { get; set; } = [];
 {{~ end ~}}
 {{~ end ~}}
 {{~ if $need_line_break ~}}
@@ -45,7 +45,7 @@ public sealed class {{ $class_name }} : BaseModel<{{ id_type }}>
 {{~ $need_line_break = true ~}}
 {{~ $isNullable = property.type | string.ends_with '?' ~}}
 {{~ $baseType = property.type | string.replace "?" "" ~}}
-    public required {{ $baseType }}Model{{ $isNullable ? '?' : '' }} {{ property.name }} { get; set; }
+    public {{ $baseType }}Model{{ $isNullable ? '?' : '' }} {{ property.name }} { get; set; }
 {{~ end ~}}
 {{~ end ~}}
 {{~ if $need_line_break ~}}
@@ -56,7 +56,7 @@ public sealed class {{ $class_name }} : BaseModel<{{ id_type }}>
 {{~ if property.is_navigation && property.is_collection ~}}
 {{~ $need_line_break = true ~}}
 {{~ $modelType = property.type | string.replace ">" "Model>" ~}}
-    public required {{ $modelType }} {{ property.name }} { get; set; } = [];
+    public {{ $modelType }} {{ property.name }} { get; set; } = [];
 {{~ end ~}}
 {{~ end ~}}
 {{~ if $need_line_break ~}}

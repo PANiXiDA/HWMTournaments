@@ -14,4 +14,5 @@ public class DefaultDbContext : DbContext, IDataProtectionKeyContext
     public virtual DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
     public virtual DbSet<Settings> Settings { get; set; }
     public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<Tournament> Tournaments { get; set; }
 }

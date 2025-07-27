@@ -18,6 +18,7 @@ public static class DependencyInjection
         serviceCollection.AddDataProtection().PersistKeysToDbContext<DefaultDbContext>();
         serviceCollection.AddScoped<ISettingsDAL, SettingsDAL>();
         serviceCollection.AddScoped<IUsersDAL, UsersDAL>();
+        serviceCollection.AddScoped<ITournamentsDAL, TournamentsDAL>();
 
         return serviceCollection;
     }

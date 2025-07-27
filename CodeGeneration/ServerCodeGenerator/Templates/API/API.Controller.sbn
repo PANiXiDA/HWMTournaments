@@ -1,24 +1,26 @@
 ﻿{{- $class_name = model_name + "sController" -}}
-{{- $model_name = model_name + "Model" -}}
+{{- $model_name = model_name + "DTO" -}}
 {{- $search_params = model_name + "sSearchParams" -}}
 {{- $convert_params = model_name + "sConvertParams?" -}}
 {{- $bl_interface_name = "I" + model_name + "sBL" -}}
 {{- $bl_parameter_name  = model_camel_name + "sBL" -}}
 {{- $bl_name = "_" + $bl_parameter_name -}}
+{{- $search_result = "SearchResult" -}}
 
-using System.Threading.Tasks;
-using BL.Interfaces;
-using Common.ConvertParams;
-using Common.SearchParams;
-using Dev.Template.AspNetCore.API.Controllers.Core;
-using Dev.Template.AspNetCore.API.Infrastructure.Core;
-using Dev.Template.AspNetCore.API.Infrastructure.Models;
-using Dev.Template.AspNetCore.API.Infrastructure.Models.Core;
-using Dev.Template.AspNetCore.API.Infrastructure.Responses.Core;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Dev.Template.AspNetCore.Api.Controllers;
+using BL.Interfaces;
+
+using Common.ConvertParams;
+using Common.SearchParams.Core;
+using Common.SearchParams;
+
+using DTOs.Core;
+using DTOs.Models;
+
+using UI.Server.Controllers.Core;
+
+namespace UI.Server.Controllers;
 
 [Route("api/v1/{{ model_camel_name }}s")]
 public sealed class {{ $class_name }} : BaseApiController
@@ -41,13 +43,13 @@ public sealed class {{ $class_name }} : BaseApiController
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(RestApiResponse<SearchResultViewModel<{{ $model_name }}>>), StatusCodes.Status200OK)]
     [Route("get-by-filter")]
-    public async Task<ActionResult<RestApiResponse<SearchResultViewModel<{{ $model_name }}>>>> Get([FromQuery] {{ $search_params }} searchParams, [FromQuery] {{ $convert_params }} convertParams)
+    [ProducesResponseType(typeof(RestApiResponse<{{ $search_result }}<{{ $model_name }}>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<RestApiResponse<{{ $search_result }}<{{ $model_name }}>>>> Get([FromQuery] {{ $search_params }} searchParams, [FromQuery] {{ $convert_params }} convertParams)
     {
         var searchResult = await {{ $bl_name }}.GetAsync(searchParams, convertParams);
-        var viewModel = new SearchResultViewModel<{{ $model_name }}>({{ $model_name }}.FromEntitiesList(searchResult.Objects), searchResult.Total);
-        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<SearchResultViewModel<{{ $model_name }}>>.Success(viewModel));
+        var viewModel = new {{ $search_result }}<{{ $model_name }}>(searchResult.Total, {{ $model_name }}.FromEntitiesList(searchResult.Objects), searchParams.Page, searchParams.ObjectsCount);
+        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<{{ $search_result }}<{{ $model_name }}>>.Success(viewModel));
     }
 
     [HttpPost]
@@ -59,6 +61,7 @@ public sealed class {{ $class_name }} : BaseApiController
     }
 
     [HttpPut]
+    [Route("{id:int}")]
     [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
     public async Task<ActionResult<RestApiResponse<NoContent>>> Update([FromBody] {{ $model_name }} request)
     {

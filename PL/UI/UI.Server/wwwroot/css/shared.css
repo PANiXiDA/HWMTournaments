@@ -1,0 +1,77 @@
+﻿.btn-gold {
+    background-color: #d4af37;
+    border-color: #d4af37;
+    color: #1b1b1b;
+    font-weight: bold;
+    margin-top: 1.5rem;
+}
+
+    .btn-gold:hover {
+        background-color: #bfa036;
+        border-color: #bfa036;
+    }
+
+.btn-secondary {
+    background-color: #555;
+    border-color: #555;
+    color: #eee;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color .2s, border-color .2s;
+}
+
+    .btn-secondary:hover {
+        background-color: #666;
+        border-color: #666;
+    }
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #d4af37;
+}
+
+.form-input,
+.filter-input {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    background: #1b1b1b;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #eee;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+    .form-input:focus,
+    .filter-input:focus {
+        border-color: #d4af37;
+        box-shadow: 0 0 0 3px rgba(212,175,55,0.25);
+    }
+
+.filter-input[type="text"],
+.form-input[type="text"] {
+}
+
+.filter-input,
+.form-input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+}
+
+.filter-input {
+    max-width: 360px;
+    min-height: 2.4rem;
+    line-height: 1.2;
+    vertical-align: middle;
+}

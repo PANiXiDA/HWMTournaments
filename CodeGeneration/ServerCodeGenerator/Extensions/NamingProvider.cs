@@ -23,7 +23,7 @@ internal static class NamingProvider
         GeneratedFile.IBL => "sBL",
         GeneratedFile.BL => "sBL",
         GeneratedFile.APIController => "sController",
-        GeneratedFile.APIModel => "Model",
+        GeneratedFile.APIModel => "DTO",
         _ => string.Empty
     };
 }

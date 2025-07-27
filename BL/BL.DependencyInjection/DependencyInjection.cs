@@ -11,6 +11,7 @@ public static class DependencyInjection
     {
         serviceCollection.AddScoped<ISettingsBL, SettingsBL>();
         serviceCollection.AddScoped<IUsersBL, UsersBL>();
+        serviceCollection.AddScoped<ITournamentsBL, TournamentsBL>();
 
         return serviceCollection;
     }

@@ -1,0 +1,33 @@
+﻿.home-intro {
+    text-align: center;
+    margin: 4rem auto;
+    max-width: 800px;
+    padding: 0 1rem;
+}
+
+    .home-intro h1 {
+        font-size: 2.8rem;
+        margin-bottom: 1rem;
+        color: #d4af37;
+    }
+
+    .home-intro p {
+        max-width: 600px;
+        margin: 0.5rem auto;
+        line-height: 1.5;
+    }
+
+@media (max-width: 600px) {
+    .home-intro h1 {
+        font-size: 2rem;
+    }
+
+    .home-intro p {
+        font-size: 0.9rem;
+    }
+
+    .btn-gold {
+        width: 100%;
+        padding: 0.75rem;
+    }
+}

@@ -267,7 +267,7 @@ public abstract class BaseDAL<TDbContext, TDbObject, TEntity, TId, TSearchParams
         {
             Total = await objects.CountAsync(),
             Objects = new List<TEntity>(),
-            RequestedObjectsCount = searchParams.ObjectsCount,
+            RequestedObjectsCount = searchParams.ObjectsCount ?? await objects.CountAsync(),
             RequestedPage = searchParams.Page,
         };
 

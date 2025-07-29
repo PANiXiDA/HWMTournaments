@@ -39,7 +39,7 @@ public sealed class TournamentsController : BaseApiController
     public async Task<ActionResult<RestApiResponse<SearchResult<TournamentDTO>>>> Get([FromQuery] TournamentsSearchParams searchParams, [FromQuery] TournamentsConvertParams? convertParams)
     {
         var searchResult = await _tournamentsBL.GetAsync(searchParams, convertParams);
-        var viewModel = new SearchResult<TournamentDTO>(searchResult.Total, TournamentDTO.FromEntitiesList(searchResult.Objects), searchParams.Page, searchParams.ObjectsCount);
+        var viewModel = new SearchResult<TournamentDTO>(searchResult.Total, TournamentDTO.FromEntitiesList(searchResult.Objects), searchParams.Page, searchParams.ObjectsCount ?? searchResult.Total);
         return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<SearchResult<TournamentDTO>>.Success(viewModel));
     }
 

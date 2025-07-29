@@ -1,7 +1,5 @@
 ﻿@page "/tournaments"
 @inject HttpClient Http
-@inject NavigationManager Navigation
-@inject IJSRuntime JS
 
 <PageTitle>Турниры</PageTitle>
 
@@ -12,22 +10,22 @@
 </div>
 
 <div class="tournaments-filters">
-    <input class="filter-input" placeholder="Поиск по названию…" @bind="_searchQuery" />
-    <select class="filter-input" @bind="_format">
+    <input class="filter-input" placeholder="Поиск по названию…" @bind="_searchParams.SearchQuery" />
+    <select class="filter-input" @bind="_searchParams.Format">
         <option value="">— Формат турнира —</option>
         @foreach (var item in Enum.GetValues<TournamentFormat>())
         {
             <option value="@item">@item.GetDisplayName()</option>
         }
     </select>
-    <button class="btn btn-secondary" @onclick="ApplyFilters">Применить</button>
+    <button class="btn btn-secondary" @onclick="() => _pager!.ApplyFiltersAsync()">Применить</button>
 </div>
 
-@if (_result is null)
+@if (_searchResult is null)
 {
     <p>Загрузка…</p>
 }
-else if (_result.Objects.Count == 0)
+else if (_searchResult.Objects.Count == 0)
 {
     <p>Ничего не найдено.</p>
 }
@@ -45,7 +43,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var tournament in _result.Objects)
+            @foreach (var tournament in _searchResult.Objects)
             {
                 <tr>
                     <td>@tournament.Name</td>
@@ -62,82 +60,23 @@ else
             }
         </tbody>
     </table>
-
-    <Pagination Total="_result.Total"
-                Page="_result.RequestedPage"
-                PageSize="_result.RequestedObjectsCount ?? _pageSize"
-                OnPageChanged="LoadPage"
-                OnPageSizeChanged="ChangePageSize"
-                UpdateUrl="true"
-                PageQueryParam="Page"
-                PageSizeQueryParam="ObjectsCount"
-                ExtraQuery="CurrentFiltersAsQuery()" />
 }
 
+<Pagination TDTO="TournamentDTO"
+            TSearchParams="TournamentsSearchParams"
+            @ref="_pager"
+            ApiUrl="/api/v1/tournaments/get-by-filter"
+            @bind-SearchParams="_searchParams"
+            @bind-SearchResult="_searchResult" />
+
 @code {
-    private SearchResult<TournamentDTO>? _result;
-
-    private string? _searchQuery;
-    private TournamentFormat? _format;
-
-    private int _page = 1;
-    private int _pageSize = 10;
-    private int _totalCount;
-    private int _totalPages => (int)Math.Ceiling((double)_totalCount / _pageSize);
-
-    private List<int?> _pageNumbers = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        var q = QueryHelpers.ParseQuery(uri.Query);
-        if (q.TryGetValue("Page", out var p) && int.TryParse(p, out var page) && page > 0) _page = page;
-        if (q.TryGetValue("ObjectsCount", out var s) && int.TryParse(s, out var size) && size > 0) _pageSize = size;
-
-        await LoadPage(_page);
-    }
-
-    private async Task LoadPage(int page)
-    {
-        _page = page;
-
-        var url = $"api/v1/tournaments/get-by-filter?Page={_page}&ObjectsCount={_pageSize}";
-        var resp = await Http.GetFromJsonAsync<RestApiResponse<SearchResult<TournamentDTO>>>(url);
-        _result = resp?.Payload;
-    }
-
-    private Task ChangePageSize(int size)
-    {
-        _pageSize = size;
-        return LoadPage(1);
-    }
-
-    private IReadOnlyDictionary<string, string?> CurrentFiltersAsQuery()
-        => new Dictionary<string, string?>
-        {
-            {"SearchQuery", _searchQuery}, {"Format", _format?.ToString()}
-        };
-
-    private async Task ApplyFilters()
-    {
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        var q = QueryHelpers.ParseQuery(uri.Query).ToDictionary(k => k.Key, v => v.Value.ToString());
-
-        q["Page"] = _page.ToString();
-        q["ObjectsCount"] = _pageSize.ToString();
-        if (string.IsNullOrWhiteSpace(_searchQuery)) q.Remove("SearchQuery"); else q["SearchQuery"] = _searchQuery!;
-        if (_format.HasValue) q["Format"] = _format.Value.ToString(); else q.Remove("Format");
-
-        var newUrl = QueryHelpers.AddQueryString(uri.GetLeftPart(UriPartial.Path), q!);
-        Navigation.NavigateTo(newUrl, replace: true);
-
-        await LoadPage(_page);
-    }
+    private TournamentsSearchParams _searchParams = new() { Page = 1, ObjectsCount = 10 };
+    private SearchResult<TournamentDTO>? _searchResult;
+    private Pagination<TournamentDTO, TournamentsSearchParams>? _pager;
 
     private async Task ConfirmDelete(int id)
     {
-        if (!await JS.InvokeAsync<bool>("confirm", $"Удалить турнир #{id}?")) return;
         await Http.DeleteAsync($"api/v1/tournaments/{id}");
-        await LoadPage(_page);
+        if (_pager is not null) await _pager.ApplyFiltersAsync();
     }
 }

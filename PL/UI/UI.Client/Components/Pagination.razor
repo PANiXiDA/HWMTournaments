@@ -1,121 +1,45 @@
-﻿@inject NavigationManager Nav
+﻿@typeparam TDTO
+@typeparam TSearchParams where TSearchParams : BaseSearchParams, new()
 
-@if (Total > 0 && TotalPages > 1)
+@if (TotalPages > 1)
 {
     <nav aria-label="Пагинация" class="d-flex align-items-center gap-3">
         <ul class="pagination mb-0">
             <li class="page-item @(IsFirst ? "disabled" : "")">
                 <a class="page-link" href="#"
-                   @onclick="() => Go(Page - 1)"
-                   @onclick:preventDefault @onclick:stopPropagation>‹</a>
+                   @onclick="() => Go(SearchResult.RequestedPage - 1)"
+                   @onclick:preventDefault @onclick:stopPropagation>
+                    ‹
+                </a>
             </li>
 
-            @foreach (var p in VisiblePages)
+            @foreach (var visiblePage in VisiblePages)
             {
-                <li class="page-item @(p == Page ? "active" : "")">
-                    <a class="page-link" href="#"
-                       @onclick="() => Go(p)"
-                       @onclick:preventDefault @onclick:stopPropagation>@p</a>
-                </li>
+                @if (!visiblePage.HasValue)
+                {
+                    <li class="page-item disabled ellipsis">
+                        <span class="page-link">…</span>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item @(visiblePage.Value == SearchResult.RequestedPage ? "active" : "")">
+                        <a class="page-link" href="#"
+                           @onclick="() => Go(visiblePage.Value)"
+                           @onclick:preventDefault @onclick:stopPropagation>
+                            @visiblePage.Value
+                        </a>
+                    </li>
+                }
             }
 
             <li class="page-item @(IsLast ? "disabled" : "")">
                 <a class="page-link" href="#"
-                   @onclick="() => Go(Page + 1)"
-                   @onclick:preventDefault @onclick:stopPropagation>›</a>
+                   @onclick="() => Go(SearchResult.RequestedPage + 1)"
+                   @onclick:preventDefault @onclick:stopPropagation>
+                    ›
+                </a>
             </li>
         </ul>
-
-        @if (ShowPageSize)
-        {
-            <div>
-                <select class="form-select form-select-sm" style="width:auto; display:inline-block"
-                        @onchange="OnPageSizeChange">
-                    @foreach (var s in PageSizeOptions)
-                    {
-                        <option value="@s" selected="@(s == PageSize)">@s</option>
-                    }
-                </select>
-                <span class="ms-2 text-muted">из @Total (@TotalPages стр.)</span>
-            </div>
-        }
     </nav>
-}
-
-@code {
-    [Parameter] public int Total { get; set; }
-    [Parameter] public int Page { get; set; } = 1;
-    [Parameter] public int PageSize { get; set; } = 10;
-
-    [Parameter] public EventCallback<int> OnPageChanged { get; set; }
-    [Parameter] public EventCallback<int> OnPageSizeChanged { get; set; }
-
-    [Parameter] public int MaxPages { get; set; } = 5;
-    [Parameter] public bool ShowPageSize { get; set; } = true;
-    [Parameter] public IEnumerable<int> PageSizeOptions { get; set; } = new[] { 10, 20, 50, 100 };
-
-    [Parameter] public bool UpdateUrl { get; set; } = true;
-    [Parameter] public bool ReplaceHistory { get; set; } = true;
-    [Parameter] public string PageQueryParam { get; set; } = "Page";
-    [Parameter] public string PageSizeQueryParam { get; set; } = "ObjectsCount";
-    [Parameter] public IReadOnlyDictionary<string, string?>? ExtraQuery { get; set; }
-
-    private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)Total / Math.Max(1, PageSize)));
-    private bool IsFirst => Page <= 1;
-    private bool IsLast => Page >= TotalPages;
-
-    private IEnumerable<int> VisiblePages
-    {
-        get
-        {
-            var half = MaxPages / 2;
-            var start = Math.Max(1, Page - half);
-            var end = Math.Min(TotalPages, start + MaxPages - 1);
-            start = Math.Max(1, end - MaxPages + 1);
-            return Enumerable.Range(start, end - start + 1);
-        }
-    }
-
-    private async Task Go(int page)
-    {
-        page = Math.Clamp(page, 1, TotalPages);
-
-        if (UpdateUrl)
-        {
-            var uri = Nav.ToAbsoluteUri(Nav.Uri);
-            var query = QueryHelpers.ParseQuery(uri.Query).ToDictionary(item => item.Key, item => item.Value.ToString());
-            query[PageQueryParam] = page.ToString();
-            query[PageSizeQueryParam] = PageSize.ToString();
-            if (ExtraQuery != null)
-            {
-                foreach (var item in ExtraQuery) 
-                {
-                    query[item.Key] = item.Value ?? string.Empty;
-                }
-            }
-
-            var baseUri = uri.GetLeftPart(UriPartial.Path);
-            var newUri = QueryHelpers.AddQueryString(baseUri, query!);
-            Nav.NavigateTo(newUri, replace: ReplaceHistory);
-        }
-
-        if (OnPageChanged.HasDelegate)
-        {
-            await OnPageChanged.InvokeAsync(page);
-        }
-    }
-
-    private async Task OnPageSizeChange(ChangeEventArgs @event)
-    {
-        if (int.TryParse(@event?.Value?.ToString(), out var size) && size > 0)
-        {
-            if (OnPageSizeChanged.HasDelegate)
-            {
-                await OnPageSizeChanged.InvokeAsync(size);
-            }
-
-            PageSize = size;
-            await Go(1);
-        }
-    }
 }

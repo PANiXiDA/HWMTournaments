@@ -9,17 +9,9 @@
     <NavLink class="btn btn-gold" href="/tournaments/create">Создать турнир</NavLink>
 </div>
 
-<div class="tournaments-filters">
-    <input class="filter-input" placeholder="Поиск по названию…" @bind="_searchParams.SearchQuery" />
-    <select class="filter-input" @bind="_searchParams.Format">
-        <option value="">— Формат турнира —</option>
-        @foreach (var item in Enum.GetValues<TournamentFormat>())
-        {
-            <option value="@item">@item.GetDisplayName()</option>
-        }
-    </select>
-    <button class="btn btn-secondary" @onclick="() => _pager!.ApplyFiltersAsync()">Применить</button>
-</div>
+<Filter TSearchParams="Common.SearchParams.TournamentsSearchParams"
+        @bind-SearchParams="_searchParams"
+        OnApplyFilters="() => _pager!.ApplyFiltersAsync()" />
 
 @if (_searchResult is null)
 {

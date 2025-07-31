@@ -1,0 +1,101 @@
+﻿.filter-container {
+    margin-top: 1.5rem;
+}
+
+.filter-toggle {
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+    color: #d4af37;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.toggle-icon {
+    display: inline-block;
+    width: 1.2rem;
+    height: 1.2rem;
+    line-height: 1.2rem;
+    text-align: center;
+    border: 1px solid #d4af37;
+    border-radius: 4px;
+}
+
+.filter-panel {
+    background-color: #121212;
+    border: 1px solid #333;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-item {
+    flex: 0 1 calc((100% - 3 * 0.5rem) / 4);
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-input {
+    width: 100%;
+    height: 2.4rem;
+    padding: 0 0.75rem;
+    margin-top: 0.25rem;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #fff;
+}
+
+.filter-checkbox {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 2.4rem;
+    height: 2.4rem;
+    margin-top: 0.25rem;
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    transition: border-color .2s, background-color .2s;
+}
+
+    .filter-checkbox:hover {
+        border-color: #555;
+    }
+
+    .filter-checkbox:checked {
+        background-color: #2a2a2a;
+        border-color: #d4af37;
+    }
+
+        .filter-checkbox:checked::after {
+            content: "";
+            position: absolute;
+            left: 0.65rem;
+            top: 0.25rem;
+            width: 0.5rem;
+            height: 1rem;
+            border: solid #d4af37;
+            border-width: 0 0.2rem 0.2rem 0;
+            transform: rotate(45deg);
+        }
+
+.filter-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    justify-content: flex-start;
+}

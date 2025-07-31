@@ -1,0 +1,106 @@
+﻿@typeparam TSearchParams where TSearchParams : BaseSearchParams, new()
+
+<div class="filter-container">
+    <div class="filter-toggle" @onclick="ToggleExpanded">
+        @if (_expanded)
+        {
+            <span class="toggle-icon">−</span>
+        }
+        else
+        {
+            <span class="toggle-icon">+</span>
+        }
+    </div>
+
+    @if (_expanded)
+    {
+        <div class="filter-panel">
+            <div class="filter-fields">
+                @foreach (var property in _properties)
+                {
+                    var label = property.GetCustomAttribute<DisplayAttribute>()?.Name
+                    ?? property.Name;
+                    var type = Nullable.GetUnderlyingType(property.PropertyType)
+                    ?? property.PropertyType;
+
+                    <div class="filter-item">
+                        <label>@label</label>
+
+                        @if (type == typeof(string))
+                        {
+                            <input class="filter-input"
+                                   placeholder="@label…"
+                                   value="@BindValue(property)"
+                                   @onchange="e => BindValueChanged(e, property)" />
+                        }
+                        else if (type.IsEnum)
+                        {
+                            <select class="filter-input"
+                                    value="@BindValue(property)"
+                                    @onchange="e => BindValueChanged(e, property)">
+                                <option value="">— @label —</option>
+                                @foreach (Enum v in Enum.GetValues(type))
+                                {
+                                    <option value="@v">@v.GetDisplayName()</option>
+                                }
+                            </select>
+                        }
+                        else if (type == typeof(bool))
+                        {
+                            var isChecked = bool.TryParse(BindValue(property), out var bVal) && bVal;
+                            <input type="checkbox"
+                                   class="filter-checkbox"
+                                   checked="@isChecked"
+                                   @onchange="e => BindValueChanged(e, property)" />
+                        }
+                        else if (type == typeof(int) || type == typeof(long))
+                        {
+                            <input type="number"
+                                   step="1"
+                                   class="filter-input"
+                                   placeholder="@label"
+                                   value="@BindValue(property)"
+                                   @onchange="e => BindValueChanged(e, property)" />
+                        }
+                        else if (type == typeof(float)
+                        || type == typeof(double)
+                        || type == typeof(decimal))
+                        {
+                            <input type="number"
+                                   step="any"
+                                   class="filter-input"
+                                   placeholder="@label"
+                                   value="@BindValue(property)"
+                                   @onchange="e => BindValueChanged(e, property)" />
+                        }
+                        else if (type == typeof(DateTime))
+                        {
+                            <input type="date"
+                                   class="filter-input"
+                                   value="@(BindValue(property) is { } s ? DateTime.Parse(s).ToString("yyyy-MM-dd") : null)"
+                        @onchange="e => BindValueChanged(e, property)" />
+                        }
+                        else
+                        {
+                            <input class="filter-input"
+                                   placeholder="@label…"
+                                   value="@BindValue(property)"
+                                   @onchange="e => BindValueChanged(e, property)" />
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="filter-actions">
+                <button class="btn btn-secondary"
+                        @onclick="OnReset">
+                    Сбросить
+                </button>
+                <button class="btn btn-secondary"
+                        @onclick="OnApply">
+                    Применить
+                </button>
+            </div>
+        </div>
+    }
+</div>

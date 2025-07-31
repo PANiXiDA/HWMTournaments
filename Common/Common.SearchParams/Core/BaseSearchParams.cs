@@ -1,4 +1,6 @@
-﻿using Common.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+
+using Common.Enums;
 
 namespace Common.SearchParams.Core;
 
@@ -8,9 +10,11 @@ public class BaseSearchParams
     public int? ObjectsCount { get; set; }
     public string? SortField { get; set; }
     public SortOrder SortOrder { get; set; }
-    public string? SearchQuery { get; set; }
-    public bool IsDeleted { get; set; } = false;
 
+    [Display(Name = "Поиск по названию")]
+    public string? SearchQuery { get; set; }
+
+    public bool IsDeleted { get; set; } = false;
     public DateTime? CreatedFrom { get; set; }
     public DateTime? CreatedTo { get; set; }
     public DateTime? UpdatedFrom { get; set; }

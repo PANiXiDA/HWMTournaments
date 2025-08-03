@@ -2,4 +2,5 @@
 
 public sealed class UsersConvertParams
 {
+    public bool IncludeApplicationUser { get; set; } = true;
 }

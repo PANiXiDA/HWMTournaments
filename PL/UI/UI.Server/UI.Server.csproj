@@ -8,10 +8,17 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\BL\BL.DependencyInjection\BL.DependencyInjection.csproj" />
+        <ProjectReference Include="..\..\..\Common\Common.Logger.Configuration\Common.Logger.Configuration.csproj" />
+        <ProjectReference Include="..\..\..\Common\Common.Mappers\Common.Mappers.csproj" />
+        <ProjectReference Include="..\..\..\Common\Common.Prometheus.Configuration\Common.Prometheus.Configuration.csproj" />
         <ProjectReference Include="..\..\..\DAL\DAL.DependencyInjection\DAL.DependencyInjection.csproj" />
         <ProjectReference Include="..\..\..\Domain\DTOs\DTOs.csproj" />
         <ProjectReference Include="..\UI.Client\UI.Client.csproj" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.18" />
+        <PackageReference Include="Unchase.Swashbuckle.AspNetCore.Extensions" Version="2.7.2" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
+        <PackageReference Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="6.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.17" />
     </ItemGroup>
 
 </Project>

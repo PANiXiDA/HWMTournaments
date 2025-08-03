@@ -24,4 +24,12 @@ public static class ErrorMessagesConstants
     public const string WebSocketConnection = "WebSocket connection required.";
 
     #endregion
+
+    #region IdentityService errors
+
+    public const string EmptyPassword = "Empty parameter password.";
+    public const string RoleMismatch = "Role mismatch.";
+    public const string IncorrentLoginOrPassword = "Incorrent login or password.";
+
+    #endregion
 }

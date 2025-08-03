@@ -59,5 +59,12 @@ public sealed class UsersBL : IUsersBL
     {
         return _usersDAL.DeleteAsync(db => ids.Contains(db.Id));
     }
+
+    public async Task<int> RegistrationAsync(User entity)
+    {
+        await AddOrUpdateAsync(entity);
+
+        return entity.Id;
+    }
 }
 

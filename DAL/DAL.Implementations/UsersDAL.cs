@@ -38,6 +38,10 @@ public sealed class UsersDAL : BaseDAL<DefaultDbContext, DbModels.User, Entities
     internal static Entities.User ConvertDbObjectToEntity(DbModels.User dbObject)
     {
         return new Entities.User(
-            id: dbObject.Id);
+            id: dbObject.Id,
+            applicationUserId: dbObject.ApplicationUserId)
+        {
+            ApplicationUser = dbObject.ApplicationUser != null ? ApplicationUsersDAL.ConvertDbObjectToProto(dbObject.ApplicationUser) : null,
+        };
     }
 }

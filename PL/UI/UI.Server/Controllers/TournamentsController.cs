@@ -1,13 +1,14 @@
-using Microsoft.AspNetCore.Mvc;
-
 using BL.Interfaces;
 
 using Common.ConvertParams;
-using Common.SearchParams.Core;
+using Common.Mappers;
 using Common.SearchParams;
+using Common.SearchParams.Core;
 
 using DTOs.Core;
 using DTOs.Models;
+
+using Microsoft.AspNetCore.Mvc;
 
 using UI.Server.Controllers.Core;
 
@@ -29,7 +30,7 @@ public sealed class TournamentsController : BaseApiController
     [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RestApiResponse<TournamentDTO>>> Get([FromRoute] int id, [FromQuery] TournamentsConvertParams? convertParams)
     {
-        var response = TournamentDTO.FromEntity(await _tournamentsBL.GetAsync(id));
+        var response = TournamentsMapper.EntityToDTO(await _tournamentsBL.GetAsync(id));
         return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<TournamentDTO>.Success(response));
     }
 
@@ -39,7 +40,7 @@ public sealed class TournamentsController : BaseApiController
     public async Task<ActionResult<RestApiResponse<SearchResult<TournamentDTO>>>> Get([FromQuery] TournamentsSearchParams searchParams, [FromQuery] TournamentsConvertParams? convertParams)
     {
         var searchResult = await _tournamentsBL.GetAsync(searchParams, convertParams);
-        var viewModel = new SearchResult<TournamentDTO>(searchResult.Total, TournamentDTO.FromEntitiesList(searchResult.Objects), searchParams.Page, searchParams.ObjectsCount ?? searchResult.Total);
+        var viewModel = new SearchResult<TournamentDTO>(searchResult.Total, TournamentsMapper.FromEntityToDTOList(searchResult.Objects), searchParams.Page, searchParams.ObjectsCount ?? searchResult.Total);
         return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<SearchResult<TournamentDTO>>.Success(viewModel));
     }
 
@@ -47,7 +48,7 @@ public sealed class TournamentsController : BaseApiController
     [ProducesResponseType(typeof(RestApiResponse<int>), StatusCodes.Status201Created)]
     public async Task<ActionResult<RestApiResponse<int>>> Create([FromBody] TournamentDTO request)
     {
-        request.Id = await _tournamentsBL.AddOrUpdateAsync(TournamentDTO.ToEntity(request));
+        request.Id = await _tournamentsBL.AddOrUpdateAsync(TournamentsMapper.DTOToEntity(request));
         return StatusCode(StatusCodes.Status201Created, RestApiResponseBuilder<int>.Success(request.Id));
     }
 
@@ -56,7 +57,7 @@ public sealed class TournamentsController : BaseApiController
     [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
     public async Task<ActionResult<RestApiResponse<NoContent>>> Update([FromBody] TournamentDTO request)
     {
-        await _tournamentsBL.AddOrUpdateAsync(TournamentDTO.ToEntity(request));
+        await _tournamentsBL.AddOrUpdateAsync(TournamentsMapper.DTOToEntity(request));
         return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<NoContent>.Success(new NoContent()));
     }
 

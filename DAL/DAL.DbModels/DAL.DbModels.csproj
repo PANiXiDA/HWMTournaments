@@ -7,7 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Common\Common.Attributes\Common.Attributes.csproj" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.16" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Common\Common.Attributes\Common.Attributes.csproj" />
     </ItemGroup>
 
 </Project>

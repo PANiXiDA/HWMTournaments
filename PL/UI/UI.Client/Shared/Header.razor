@@ -16,7 +16,11 @@
     </div>
 
     <div class="header-right">
-        <NavLink href="login" class="btn btn-outline-light">Войти</NavLink>
-        <NavLink href="register" class="btn btn-primary">Регистрация</NavLink>
+        <button class="btn btn-outline-light" @onclick="@(() => Navigation.NavigateTo("/login"))">
+            Войти
+        </button>
+        <button class="btn btn-primary" @onclick="@(() => Navigation.NavigateTo("/register"))">
+            Регистрация
+        </button>
     </div>
 </header>

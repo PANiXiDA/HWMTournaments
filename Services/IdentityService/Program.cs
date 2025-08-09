@@ -5,11 +5,11 @@ using IdentityService.Extensions.Configurations;
 
 using RedisClient;
 
+using static Common.Constants.IdentityServiceConstants;
+
 var builder = WebApplication.CreateBuilder(args);
 
 #region Custom Extensions
-
-builder.ConfigureKestrelPorts();
 
 builder.Services.UseDAL(builder.Configuration);
 
@@ -22,6 +22,7 @@ builder.Services.UseAutoMapper();
 
 var app = builder.Build();
 
+app.UseCors(CorsPolicies.AllowAll);
 app.MapGrpcEndpoints();
 app.UseIdentityServer();
 await app.Services.SynchronizerEnumRolesAsync();

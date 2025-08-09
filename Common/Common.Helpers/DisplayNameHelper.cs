@@ -24,17 +24,22 @@ public static class DisplayNameHelper
         return displayAttr?.GetName() ?? value.ToString();
     }
 
-    public static string GetDisplayName<TModel, TProperty>(this TModel model, Expression<Func<TModel, TProperty>> expr)
+    public static string GetDisplayName<TModel, TProperty>(this TModel model, Expression<Func<TModel, TProperty>> expression)
     {
-        MemberExpression member = expr.Body as MemberExpression;
-        if (member == null && expr.Body is UnaryExpression unary && unary.Operand is MemberExpression inner)
+        MemberExpression? member = expression.Body as MemberExpression;
+
+        if (member == null && expression.Body is UnaryExpression unary && unary.Operand is MemberExpression inner)
+        {
             member = inner;
-
+        }
         if (member == null)
+        {
             return string.Empty;
-
+        }
         if (member.Member is not PropertyInfo prop)
+        {
             return member.Member.Name;
+        }
 
         var displayAttr = prop.GetCustomAttribute<DisplayAttribute>();
         return displayAttr?.GetName() ?? prop.Name;

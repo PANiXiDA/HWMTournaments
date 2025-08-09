@@ -11,6 +11,7 @@ public static class AppsettingsKeysConstants
     #region http clients
 
     public const string ServerAPIBaseAddress = "HttpClients:ServerAPI:BaseAddress";
+    public const string IdentityServiceHTTPBaseAddress = "HttpClients:IdentityService:BaseAddress";
 
     #endregion
 

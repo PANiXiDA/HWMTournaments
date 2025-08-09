@@ -1,13 +1,10 @@
 using BL.DependencyInjection;
 
-using Common.Constants;
-using Common.Constants.ServiceConfiguration;
-
 using DAL.DependencyInjection;
 
 using Microsoft.AspNetCore.Components;
 
-using UI.Client.Services;
+using UI.Client.Extensions;
 using UI.Server.Components;
 using UI.Server.Extensions.Configurations;
 using UI.Server.Middlewares;
@@ -27,14 +24,14 @@ builder.Services.ConfigureGrpcClients(builder.Configuration);
 builder.Services.UseDAL(builder.Configuration);
 builder.Services.UseBL();
 
+builder.Services.UseServices();
+
 builder.Services.AddAuthenticationAndAuthorization(builder.Configuration);
-builder.Services.AddSwagger(ServiceNamesConstants.ApiGateway);
+builder.Services.AddSwagger("hwm-tournaments-api");
 
 #endregion
 
 builder.Services.AddControllers();
-
-builder.Services.AddScoped<NotificationService>();
 
 builder.Services.AddScoped(sp =>
 {

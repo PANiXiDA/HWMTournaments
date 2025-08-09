@@ -6,8 +6,8 @@
         <ValidationSummary class="validation-summary" />
 
         <div class="form-group">
-            <label class="form-label" for="nickname">@_loginRequest.GetDisplayName(property => property.Name)</label>
-            <InputText id="nickname" @bind-Value="_loginRequest.Name" class="form-input" />
+            <label class="form-label" for="login">@_loginRequest.GetDisplayName(property => property.Login)</label>
+            <InputText id="login" @bind-Value="_loginRequest.Login" class="form-input" />
         </div>
 
         <div class="form-group">

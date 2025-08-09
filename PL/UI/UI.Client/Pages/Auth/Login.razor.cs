@@ -1,21 +1,15 @@
-﻿using System.Net.Http.Json;
-
-using Common.Helpers;
-
-using DTOs.Requests;
-
-using Microsoft.AspNetCore.Components;
-
+﻿using Microsoft.AspNetCore.Components;
 using UI.Client.Services;
+using DTOs.Requests;
 
 namespace UI.Client.Pages.Auth;
 
 public partial class Login
 {
-    [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private ILogger<Login> Logger { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private NotificationService Notifications { get; set; } = default!;
+    [Inject] private AuthService Auth { get; set; } = default!;
 
     private readonly LoginRequest _loginRequest = new();
 
@@ -23,26 +17,17 @@ public partial class Login
     {
         try
         {
-            Logger.LogInformation("Отправка запроса авторизации для Name={Name}", _loginRequest.Name);
+            Logger.LogInformation("Авторизация: Name={Name}", _loginRequest.Login);
 
-            var response = await Http.PostAsJsonAsync("api/v1/auth/login", _loginRequest);
-
-            if (response.IsSuccessStatusCode)
+            var (ok, error) = await Auth.LoginAsync(_loginRequest.Login, _loginRequest.Password);
+            if (ok)
             {
-                Logger.LogInformation("Авторизация успешна");
-                await Notifications.NotifyAsync("Вы успешно вошли в систему!");
+                await Notifications.NotifyAsync("Вы успешно вошли!");
+                // TODO: при желании — редирект на главную/профиль
                 return;
             }
 
-            var errorJson = await response.Content.ReadAsStringAsync();
-            Logger.LogWarning("Ошибка авторизации: {Error}", errorJson);
-
-            var detail = ApiErrorHelper.TryExtractDetail(errorJson);
-            var message = string.IsNullOrWhiteSpace(detail)
-                ? "Не удалось авторизоваться. Проверьте данные и попробуйте ещё раз."
-                : $"Ошибка входа: {detail}";
-
-            await Notifications.NotifyAsync(message, isError: true);
+            await Notifications.NotifyAsync($"Ошибка входа: {error}", isError: true);
         }
         catch (Exception ex)
         {
@@ -51,13 +36,6 @@ public partial class Login
         }
     }
 
-    private void ConfirmEmail()
-    {
-        Notifications.NotifyAsync("Переход на подтверждение почты...");
-    }
-
-    private void ForgotPassword()
-    {
-        Notifications.NotifyAsync("Переход на восстановление пароля...");
-    }
+    private void ConfirmEmail() => Notifications.NotifyAsync("Переход на подтверждение почты...");
+    private void ForgotPassword() => Notifications.NotifyAsync("Переход на восстановление пароля...");
 }

@@ -1,0 +1,99 @@
+﻿.form-container {
+    background-color: #000;
+    padding: 2rem;
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    margin: 2rem auto;
+    font-family: 'Cinzel', serif;
+    color: #FFD700;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #FFD700;
+    width: 50%;
+    text-align: left;
+}
+
+.login-root ::deep input.form-input {
+    width: 50%;
+    display: block;
+    margin: 0 auto;
+    padding: 0.5rem;
+    background-color: #111;
+    color: #fff;
+    outline: none;
+}
+
+    .login-root ::deep input.form-input:focus {
+        border-color: #FFD700;
+        box-shadow: 0 0 5px #FFD700;
+    }
+
+.buttons-row {
+    width: 50%; /* та же ширина, что и у инпутов */
+    display: flex;
+    gap: 1rem;
+    margin: 1rem auto 0;
+}
+
+.action-button {
+    flex: 1;
+    padding: 0.75rem;
+    background-color: #FFD700;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #000;
+    transition: background-color 0.3s ease;
+    text-align: center;
+}
+
+    .action-button:hover {
+        background-color: #FFC300;
+    }
+
+.links-container {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    color: #FFD700;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 0.9rem;
+    padding: 0;
+}
+
+    .link-button:hover {
+        color: #FFC300;
+    }
+
+@media (max-width: 576px) {
+    .form-label,
+    .login-root ::deep input.form-input,
+    .buttons-row {
+        width: 100%;
+    }
+
+    .buttons-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

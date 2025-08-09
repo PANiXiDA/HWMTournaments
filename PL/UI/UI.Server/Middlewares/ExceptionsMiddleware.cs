@@ -5,7 +5,7 @@ using DTOs.Core;
 
 using Grpc.Core;
 
-namespace Dev.Template.AspNetCore.API.Middlewares;
+namespace UI.Server.Middlewares;
 
 public sealed class ExceptionsMiddleware
 {

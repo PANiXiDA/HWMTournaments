@@ -1,11 +1,6 @@
-﻿using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-
-namespace Dev.Template.AspNetCore.API.Middlewares;
+namespace UI.Server.Middlewares;
 
 public sealed class LoggingMiddleWare
 {

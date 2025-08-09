@@ -41,8 +41,7 @@ public class ClientStore : IClientStore
     {
         return new List<Client>
         {
-            CreateClient(Clients.ReactClient, Clients.ReactClient),
-            CreateClient(Clients.ReactAdmin, Clients.ReactAdmin)
+            CreateClient(Clients.Blazor, Clients.Blazor)
         };
     }
 

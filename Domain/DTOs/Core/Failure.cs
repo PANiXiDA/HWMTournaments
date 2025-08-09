@@ -2,7 +2,7 @@
 
 public sealed class Failure
 {
-    public Dictionary<string, string> Errors { get; } = new Dictionary<string, string>();
+    public Dictionary<string, string> Errors { get; set; } = new Dictionary<string, string>();
 
     public Failure() { }
 

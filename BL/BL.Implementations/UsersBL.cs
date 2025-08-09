@@ -6,16 +6,25 @@ using Common.SearchParams.Core;
 
 using DAL.Interfaces;
 
+using Gen.IdentityService.ApplicationUserService;
+
+using static Common.Constants.IdentityServiceConstants;
+
 using User = Entities.User;
 
 namespace BL.Implementations;
 
 public sealed class UsersBL : IUsersBL
 {
+    private readonly ApplicationUserService.ApplicationUserServiceClient _applicationUserServiceClient;
+
     private readonly IUsersDAL _usersDAL;
 
-    public UsersBL(IUsersDAL usersDAL)
+    public UsersBL(
+        ApplicationUserService.ApplicationUserServiceClient applicationUserServiceClient,
+        IUsersDAL usersDAL)
     {
+        _applicationUserServiceClient = applicationUserServiceClient;
         _usersDAL = usersDAL;
     }
 
@@ -41,30 +50,71 @@ public sealed class UsersBL : IUsersBL
 
     public async Task<int> AddOrUpdateAsync(User entity)
     {
-        entity.Id = await _usersDAL.AddOrUpdateAsync(entity);
+        if (entity.Id == 0)
+        {
+            await CreateAsync(entity);
+        }
+        else
+        {
+            await UpdateAsync(entity);
+        }
+
         return entity.Id;
     }
 
-    public Task<IList<int>> AddOrUpdateAsync(IList<User> entities)
+    public async Task<IList<int>> AddOrUpdateAsync(IList<User> entities)
     {
-        return _usersDAL.AddOrUpdateAsync(entities);
+        foreach (var entity in entities)
+        {
+            await AddOrUpdateAsync(entity);
+        }
+
+        return entities.Select(item => item.Id).ToList();
     }
 
-    public Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        return _usersDAL.DeleteAsync(id);
+        var entity = await GetAsync(id);
+        await _applicationUserServiceClient.DeleteAsync(new DeleteApplicationUserRequest { Id = entity.ApplicationUserId });
+        return await _usersDAL.DeleteAsync(id);
     }
 
-    public Task<bool> DeleteAsync(List<int> ids)
+    public async Task<bool> DeleteAsync(List<int> ids)
     {
-        return _usersDAL.DeleteAsync(db => ids.Contains(db.Id));
+        foreach (var id in ids)
+        {
+            await DeleteAsync(id);
+        }
+
+        return true;
     }
 
     public async Task<int> RegistrationAsync(User entity)
     {
         await AddOrUpdateAsync(entity);
-
         return entity.Id;
+    }
+
+    private async Task CreateAsync(User entity)
+    {
+        var grpcResponse = await _applicationUserServiceClient.CreateAsync(entity.ApplicationUser);
+        entity.ApplicationUserId = grpcResponse.Id;
+
+        entity.Id = await _usersDAL.AddOrUpdateAsync(entity);
+
+        await _applicationUserServiceClient.AddClaimAsync(
+        new AddClaimRequest
+        {
+            ApplicationUserId = entity.ApplicationUserId,
+            Type = CustomJwtClaimTypes.UserId,
+            Value = entity.Id.ToString()
+        });
+    }
+
+    private async Task UpdateAsync(User entity)
+    {
+        await _applicationUserServiceClient.UpdateAsync(entity.ApplicationUser);
+        await _usersDAL.AddOrUpdateAsync(entity);
     }
 }
 

@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Dev.Template.AspNetCore.API.Extensions;
+namespace UI.Server.Extensions;
 
 public static class ClaimsPrincipalExtension
 {

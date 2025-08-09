@@ -1,14 +1,16 @@
 using BL.DependencyInjection;
 
+using Common.Constants;
 using Common.Constants.ServiceConfiguration;
 
 using DAL.DependencyInjection;
 
-using Dev.Template.AspNetCore.API.Extensions.Configurations;
-using Dev.Template.AspNetCore.API.Middlewares;
+using Microsoft.AspNetCore.Components;
 
 using UI.Client.Services;
 using UI.Server.Components;
+using UI.Server.Extensions.Configurations;
+using UI.Server.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +22,7 @@ builder.Services.AddRazorComponents()
 
 #region Custom Extensions
 
-builder.Services.ConfigureGrpcClients();
+builder.Services.ConfigureGrpcClients(builder.Configuration);
 
 builder.Services.UseDAL(builder.Configuration);
 builder.Services.UseBL();
@@ -34,14 +36,10 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<NotificationService>();
 
-builder.Services.AddHttpClient("ServerAPI", (sp, client) =>
+builder.Services.AddScoped(sp =>
 {
-    var baseAddress = builder.Configuration["HttpClients:ServerAPI:BaseAddress"];
-    if (string.IsNullOrWhiteSpace(baseAddress))
-    {
-        throw new InvalidOperationException("BaseAddress для ServerAPI не настроен в appsettings.json");
-    }
-    client.BaseAddress = new Uri(baseAddress);
+    var nav = sp.GetRequiredService<NavigationManager>();
+    return new HttpClient { BaseAddress = new Uri(nav.BaseUri) };
 });
 
 var app = builder.Build();

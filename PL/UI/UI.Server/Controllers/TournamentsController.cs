@@ -30,7 +30,7 @@ public sealed class TournamentsController : BaseApiController
     [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RestApiResponse<TournamentDTO>>> Get([FromRoute] int id, [FromQuery] TournamentsConvertParams? convertParams)
     {
-        var response = TournamentsMapper.EntityToDTO(await _tournamentsBL.GetAsync(id));
+        var response = TournamentsMapper.EntityToDTO(await _tournamentsBL.GetAsync(id, convertParams));
         return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<TournamentDTO>.Success(response));
     }
 

@@ -23,7 +23,7 @@ public class NotificationService
 
     private static async Task SafeInvokeAsync(Func<NotificationMessage, Task> func, NotificationMessage message)
     {
-        try { await func(message); } catch {  }
+        try { await func(message); } catch { }
     }
 }
 

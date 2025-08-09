@@ -4,7 +4,7 @@ using Microsoft.OpenApi.Models;
 
 using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
 
-namespace Dev.Template.AspNetCore.API.Extensions.Configurations;
+namespace UI.Server.Extensions.Configurations;
 
 public static class SwaggerConfiguration
 {

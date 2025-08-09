@@ -1,12 +1,9 @@
 ﻿using Common.Constants;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Dev.Template.AspNetCore.API.Extensions.Configurations;
+namespace UI.Server.Extensions.Configurations;
 
 public static class AuthenticationAndAuthorizationConfiguration
 {
@@ -22,7 +19,7 @@ public static class AuthenticationAndAuthorizationConfiguration
             })
             .AddJwtBearer(options =>
             {
-                options.Authority = configuration.GetValue<string>(EnvironmentConstants.IndentityAuthorityVariableName);
+                options.Authority = configuration.GetValue<string>(AppsettingsKeysConstants.IdentityServiceBaseAddress);
                 options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {

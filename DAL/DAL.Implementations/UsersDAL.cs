@@ -21,6 +21,8 @@ public sealed class UsersDAL : BaseDAL<DefaultDbContext, DbModels.User, Entities
 
     protected override Task UpdateBeforeSavingAsync(Entities.User entity, DbModels.User dbObject)
     {
+        dbObject.ApplicationUserId = entity.ApplicationUserId;
+
         return Task.CompletedTask;
     }
 

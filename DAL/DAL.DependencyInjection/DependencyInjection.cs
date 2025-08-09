@@ -1,3 +1,5 @@
+using Common.Constants;
+
 using DAL.EF;
 using DAL.Implementations;
 using DAL.Interfaces;
@@ -14,7 +16,7 @@ public static class DependencyInjection
     public static IServiceCollection UseDAL(this IServiceCollection serviceCollection, IConfiguration configuration)
     {
         serviceCollection.AddDbContext<DefaultDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnectionString")).UseSnakeCaseNamingConvention());
+            options.UseNpgsql(configuration.GetConnectionString(AppsettingsKeysConstants.DefaultDbConnectionString)).UseSnakeCaseNamingConvention());
         serviceCollection.AddDataProtection().PersistKeysToDbContext<DefaultDbContext>();
         serviceCollection.AddScoped<ISettingsDAL, SettingsDAL>();
         serviceCollection.AddScoped<IUsersDAL, UsersDAL>();

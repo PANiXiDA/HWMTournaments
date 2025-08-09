@@ -28,8 +28,8 @@ public static class ErrorMessagesConstants
     #region IdentityService errors
 
     public const string EmptyPassword = "Empty parameter password.";
-    public const string RoleMismatch = "Role mismatch.";
     public const string IncorrentLoginOrPassword = "Incorrent login or password.";
+    public const string EmailNotConfirmed = "Email not confirmed.";
 
     #endregion
 }

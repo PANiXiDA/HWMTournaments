@@ -52,16 +52,14 @@ public class ExtensionGrantValidator : IExtensionGrantValidator
         {
             var roles = await _userManager.GetRolesAsync(applicationUser);
             var client = context.Request.Client.ClientId;
-            var validationIsTrue = roles.Contains(nameof(ApplicationUserRole.Developer))
-                || client == Clients.ReactAdmin && (roles.Contains(nameof(ApplicationUserRole.Admin)));
 
-            if (validationIsTrue)
+            if (applicationUser.EmailConfirmed)
             {
                 context.Result = new GrantValidationResult(subject: applicationUser.Id.ToString(), AuthenticationMethods.Custom);
             }
             else
             {
-                context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant, ErrorMessagesConstants.RoleMismatch);
+                context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant, ErrorMessagesConstants.EmailNotConfirmed);
             }
 
             return;

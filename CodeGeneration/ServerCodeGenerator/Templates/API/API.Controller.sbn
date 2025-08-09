@@ -38,7 +38,7 @@ public sealed class {{ $class_name }} : BaseApiController
     [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RestApiResponse<{{ $model_name }}>>> Get([FromRoute] {{ id_type }} id, [FromQuery] {{ $convert_params }} convertParams)
     {
-        var response = {{ $model_name }}.FromEntity(await {{ $bl_name }}.GetAsync(id));
+        var response = {{ $model_name }}.FromEntity(await {{ $bl_name }}.GetAsync(id, convertParams));
         return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<{{ $model_name }}>.Success(response));
     }
 

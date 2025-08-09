@@ -1,10 +1,8 @@
 ﻿using Common.Constants.ServiceConfiguration;
 
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
-namespace Dev.Template.AspNetCore.API.Extensions.Configurations;
+namespace UI.Server.Extensions.Configurations;
 
 public static class KestrelConfiguration
 {

@@ -4,8 +4,8 @@ public static class IdentityServiceConstants
 {
     public static class DevTemplateAspNetCoreAPI
     {
-        public const string DevTemplateAspNetCoreAPIName = "dev_template_asp_net_core_api";
-        public const string DevTemplateAspNetCoreAPISecret = "dev_template_asp_net_core_api_secret";
+        public const string DevTemplateAspNetCoreAPIName = "hwm_tournaments_api";
+        public const string DevTemplateAspNetCoreAPISecret = "hwm_tournaments_api_secret";
     }
 
     public static class GrantTypes
@@ -15,8 +15,7 @@ public static class IdentityServiceConstants
 
     public static class Clients
     {
-        public const string ReactClient = "react_client";
-        public const string ReactAdmin = "react_admin";
+        public const string Blazor = "blazor";
     }
 
     public static class CustomJwtClaimTypes

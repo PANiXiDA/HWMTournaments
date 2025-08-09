@@ -1,7 +1,9 @@
-﻿using System.Reflection;
-using Microsoft.AspNetCore.Components;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+
 using Common.SearchParams.Core;
+
+using Microsoft.AspNetCore.Components;
 
 namespace UI.Client.Components;
 

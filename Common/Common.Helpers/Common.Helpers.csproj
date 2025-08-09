@@ -2,9 +2,11 @@
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Domain\DTOs\DTOs.csproj" />
       <ProjectReference Include="..\Common.Constants\Common.Constants.csproj" />
     </ItemGroup>
 

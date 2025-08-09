@@ -2,7 +2,7 @@
 
 using Prometheus;
 
-namespace Dev.Template.AspNetCore.API.Middlewares;
+namespace UI.Server.Middlewares;
 
 public class RequestMiddleware
 {

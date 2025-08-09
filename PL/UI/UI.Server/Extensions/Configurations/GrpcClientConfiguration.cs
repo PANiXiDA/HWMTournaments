@@ -1,24 +1,13 @@
-﻿using System;
-
-using Common.Constants.ServiceConfiguration;
-using Common.Helpers;
+﻿using Common.Constants;
 
 using Gen.IdentityService.ApplicationUserService;
 
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Dev.Template.AspNetCore.API.Extensions.Configurations;
+namespace UI.Server.Extensions.Configurations;
 
 public static class GrpcClientConfiguration
 {
-    public static void ConfigureGrpcClients(this IServiceCollection services)
+    public static void ConfigureGrpcClients(this IServiceCollection services, IConfiguration configuration)
     {
-        ConfigureGrpcClient<ApplicationUserService.ApplicationUserServiceClient>(services, ServiceNamesConstants.IdentityService);
-    }
-
-    private static void ConfigureGrpcClient<TClient>(IServiceCollection services, string serviceName) where TClient : class
-    {
-        string url = UrlHelper.GetServiceUrl(serviceName);
-        services.AddGrpcClient<TClient>(options => options.Address = new Uri(url));
+        services.AddGrpcClient<ApplicationUserService.ApplicationUserServiceClient>(options => options.Address = new Uri(configuration.GetValue<string>(AppsettingsKeysConstants.IdentityServiceBaseAddress)!));
     }
 }

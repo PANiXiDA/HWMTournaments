@@ -1,0 +1,28 @@
+﻿@page "/login"
+
+<div class="login-root">
+    <EditForm Model="@_loginRequest" OnValidSubmit="HandleLogin" class="form-container">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="validation-summary" />
+
+        <div class="form-group">
+            <label class="form-label" for="nickname">@_loginRequest.GetDisplayName(property => property.Name)</label>
+            <InputText id="nickname" @bind-Value="_loginRequest.Name" class="form-input" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="password">@_loginRequest.GetDisplayName(property => property.Password)</label>
+            <InputText id="password" @bind-Value="_loginRequest.Password" type="password" class="form-input" />
+        </div>
+
+        <div class="buttons-row">
+            <button type="submit" class="action-button">Войти</button>
+            <button type="button" class="action-button" @onclick="@(() => Navigation.NavigateTo("/register"))">Регистрация</button>
+        </div>
+
+        <div class="links-container">
+            <button type="button" class="link-button" @onclick="ConfirmEmail">Подтвердить почту</button>
+            <button type="button" class="link-button" @onclick="ForgotPassword">Забыли пароль?</button>
+        </div>
+    </EditForm>
+</div>

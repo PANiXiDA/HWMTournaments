@@ -1,6 +1,7 @@
-using Common.SearchParams.Core;
-using Common.Enums;
 using System.ComponentModel.DataAnnotations;
+
+using Common.Enums;
+using Common.SearchParams.Core;
 
 namespace Common.SearchParams;
 

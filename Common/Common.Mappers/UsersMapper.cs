@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 
 using DTOs.Models;
+using DTOs.Requests;
 
 using Entities;
 
 using Gen.IdentityService.Entities;
 
-using LocalRole = Enums.ApplicationUserRole;
 using GrpcRole = Gen.IdentityService.Enums.ApplicationUserRole;
-using DTOs.Requests;
+using LocalRole = Enums.ApplicationUserRole;
 
 public static class UsersMapper
 {

@@ -24,7 +24,7 @@ public partial class Registration
         {
             Logger.LogInformation("Отправка запроса регистрации для Email={Email}", _registrationRequest.Email);
 
-            var response = await Http.PostAsJsonAsync("api/v1/auth/registration", _registrationRequest);
+            var response = await Http.PostAsJsonAsync("api/v1/users/registration", _registrationRequest);
 
             if (response.IsSuccessStatusCode)
             {

@@ -1,5 +1,8 @@
-﻿using BL.Interfaces;
+﻿using System.Net;
 
+using BL.Interfaces;
+
+using Common.Configuration.Mail.Interfaces;
 using Common.ConvertParams;
 using Common.SearchParams;
 using Common.SearchParams.Core;
@@ -7,6 +10,8 @@ using Common.SearchParams.Core;
 using DAL.Interfaces;
 
 using Gen.IdentityService.ApplicationUserService;
+
+using Microsoft.Extensions.Configuration;
 
 using static Common.Constants.IdentityServiceConstants;
 
@@ -18,14 +23,25 @@ public sealed class UsersBL : IUsersBL
 {
     private readonly ApplicationUserService.ApplicationUserServiceClient _applicationUserServiceClient;
 
+    private readonly IEmailSender _emailSender;
+
     private readonly IUsersDAL _usersDAL;
 
+    private readonly string _confirmEmailUrl;
+
     public UsersBL(
+        IConfiguration configuration,
         ApplicationUserService.ApplicationUserServiceClient applicationUserServiceClient,
+        IEmailSender emailSender,
         IUsersDAL usersDAL)
     {
         _applicationUserServiceClient = applicationUserServiceClient;
+
+        _emailSender = emailSender;
+
         _usersDAL = usersDAL;
+
+        _confirmEmailUrl = configuration.GetValue<string>("ConfirmEmailUrl") ?? throw new ArgumentException("ConfirmEmailUrl не задано в appsettings.json.");
     }
 
     public Task<User> GetAsync(int id, UsersConvertParams? convertParams = null)
@@ -89,10 +105,15 @@ public sealed class UsersBL : IUsersBL
         return true;
     }
 
-    public async Task<int> RegistrationAsync(User entity)
+    public async Task EmailConfirmationAsync(string email)
     {
-        await AddOrUpdateAsync(entity);
-        return entity.Id;
+        var response = await _applicationUserServiceClient.GetEmailConfirmationTokenAsync(new GetEmailConfirmationTokenRequest { Email = email });
+        await SendEmailConfirmationAsync(email, response.Token);
+    }
+
+    public async Task ConfirmEmailAsync(string email, string token)
+    {
+        await _applicationUserServiceClient.ConfirmEmailAsync(new ConfirmEmailRequest { Email = email, Token = token });
     }
 
     private async Task CreateAsync(User entity)
@@ -103,12 +124,14 @@ public sealed class UsersBL : IUsersBL
         entity.Id = await _usersDAL.AddOrUpdateAsync(entity);
 
         await _applicationUserServiceClient.AddClaimAsync(
-        new AddClaimRequest
-        {
-            ApplicationUserId = entity.ApplicationUserId,
-            Type = CustomJwtClaimTypes.UserId,
-            Value = entity.Id.ToString()
-        });
+            new AddClaimRequest
+            {
+                Id = entity.ApplicationUserId,
+                Type = CustomJwtClaimTypes.UserId,
+                Value = entity.Id.ToString()
+            });
+
+        await SendEmailConfirmationAsync(entity.ApplicationUser!.Email, grpcResponse.EmailConfirmationToken);
     }
 
     private async Task UpdateAsync(User entity)
@@ -116,5 +139,21 @@ public sealed class UsersBL : IUsersBL
         await _applicationUserServiceClient.UpdateAsync(entity.ApplicationUser);
         await _usersDAL.AddOrUpdateAsync(entity);
     }
-}
 
+    private async Task SendEmailConfirmationAsync(string email, string token)
+    {
+        var url = $"{_confirmEmailUrl}?email={email}&token={WebUtility.UrlEncode(token)}";
+
+        const string subject = "Подтверждение регистрации";
+        var body = $@"
+            <p>Здравствуйте!</p>
+            <p>Для подтверждения почты перейдите по <a href=""{url}"">ссылке</a>.</p>
+            <p>Если вы не регистрировались, просто игнорируйте это письмо.</p>";
+
+
+        await _emailSender.SendAsync(
+            recipients: new[] { email },
+            subject: subject,
+            htmlBody: body);
+    }
+}

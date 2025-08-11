@@ -1,6 +1,8 @@
 ﻿@page "/login"
 
-<div class="login-root">
+<div class="login-card">
+    <h2 class="login-title">Вход</h2>
+
     <EditForm Model="@_loginRequest" OnValidSubmit="HandleLogin" class="form-container">
         <DataAnnotationsValidator />
         <ValidationSummary class="validation-summary" />

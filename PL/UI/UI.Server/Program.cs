@@ -1,3 +1,5 @@
+using Common.Configuration.Mail.DependencyInjection;
+
 using BL.DependencyInjection;
 
 using DAL.DependencyInjection;
@@ -23,6 +25,7 @@ builder.Services.ConfigureGrpcClients(builder.Configuration);
 
 builder.Services.UseDAL(builder.Configuration);
 builder.Services.UseBL();
+builder.Services.UseEmailSender(builder.Configuration);
 
 builder.Services.UseServices();
 

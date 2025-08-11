@@ -7,3 +7,4 @@
 .idea
 /CodeGeneration/ServerCodeGenerator/appsettings.json
 Services/IdentityService/keys/is-signing-key-*.json
+.env

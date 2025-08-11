@@ -40,6 +40,17 @@ public class ApplicationUserServiceImpl : ApplicationUserService.ApplicationUser
         return _mapper.Map<ApplicationUserProto>(applicationUser);
     }
 
+    public override async Task<GetEmailConfirmationTokenResponse> GetEmailConfirmationToken(GetEmailConfirmationTokenRequest request, ServerCallContext context)
+    {
+        var applicationUser = (await _userManager.FindByEmailAsync(request.Email))!;
+        var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
+
+        return new GetEmailConfirmationTokenResponse()
+        {
+            Token = emailConfirmationToken,
+        };
+    }
+
     public override async Task<CreateApplicationUserResponse> Create(ApplicationUserProto request, ServerCallContext context)
     {
         var applicationUser = _mapper.Map<ApplicationUserDb>(request);
@@ -51,16 +62,27 @@ public class ApplicationUserServiceImpl : ApplicationUserService.ApplicationUser
         }
         await SynchronizationRolesAsync(applicationUser, request.Roles);
 
+        var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
+
         return new CreateApplicationUserResponse()
         {
-            Id = applicationUser.Id
+            Id = applicationUser.Id,
+            EmailConfirmationToken = emailConfirmationToken,
         };
     }
 
     public override async Task<Empty> AddClaim(AddClaimRequest request, ServerCallContext ctx)
     {
-        var applicationUser = (await _userManager.FindByIdAsync(request.ApplicationUserId.ToString()))!;
+        var applicationUser = (await _userManager.FindByIdAsync(request.Id.ToString()))!;
         await _userManager.AddClaimAsync(applicationUser, new Claim(request.Type, request.Value));
+        return new Empty();
+    }
+
+    public override async Task<Empty> ConfirmEmail(ConfirmEmailRequest request, ServerCallContext context)
+    {
+        var applicationUser = (await _userManager.FindByEmailAsync(request.Email))!;
+        await _userManager.ConfirmEmailAsync(applicationUser, request.Token);
+
         return new Empty();
     }
 

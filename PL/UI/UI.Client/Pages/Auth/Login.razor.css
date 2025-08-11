@@ -1,80 +1,91 @@
-﻿.form-container {
-    background-color: #000;
-    padding: 2rem;
-    border: 2px solid #FFD700;
-    border-radius: 8px;
+﻿.login-card {
+    max-width: 800px;
     margin: 2rem auto;
+    padding: 2rem 1rem;
+    background-color: #000;
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 2rem;
+}
+
+.login-title {
     font-family: 'Cinzel', serif;
-    color: #FFD700;
+    color: #d4af37;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.form-container {
+    font-family: 'Cinzel', serif;
+    color: #d4af37;
 }
 
 .form-group {
     margin-bottom: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    text-align: left;
 }
 
 .form-label {
     display: block;
     margin-bottom: 0.5rem;
-    font-weight: bold;
-    color: #FFD700;
-    width: 50%;
-    text-align: left;
+    font-weight: 600;
+    color: #d4af37;
 }
 
-.login-root ::deep input.form-input {
-    width: 50%;
-    display: block;
-    margin: 0 auto;
-    padding: 0.5rem;
-    background-color: #111;
-    color: #fff;
+.login-card ::deep .form-input {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    background: #1b1b1b;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #eee;
+    font-size: 1rem;
     outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
-    .login-root ::deep input.form-input:focus {
-        border-color: #FFD700;
-        box-shadow: 0 0 5px #FFD700;
+    .login-card ::deep .form-input:focus {
+        border-color: #d4af37;
+        box-shadow: 0 0 0 3px rgba(212,175,55,0.25);
     }
 
 .buttons-row {
-    width: 50%; /* та же ширина, что и у инпутов */
     display: flex;
     gap: 1rem;
-    margin: 1rem auto 0;
+    margin-top: 1rem;
 }
 
 .action-button {
     flex: 1;
     padding: 0.75rem;
-    background-color: #FFD700;
-    border: none;
+    background-color: #d4af37;
+    border: 1px solid #d4af37;
     border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
-    color: #000;
-    transition: background-color 0.3s ease;
-    text-align: center;
+    color: #1b1b1b;
+    transition: background-color .2s, border-color .2s;
 }
 
     .action-button:hover {
-        background-color: #FFC300;
+        background-color: #bfa036;
+        border-color: #bfa036;
     }
 
 .links-container {
     margin-top: 1rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 0.25rem;
 }
 
 .link-button {
     background: none;
     border: none;
-    color: #FFD700;
+    color: #d4af37;
     cursor: pointer;
     text-decoration: underline;
     font-size: 0.9rem;
@@ -82,18 +93,11 @@
 }
 
     .link-button:hover {
-        color: #FFC300;
+        color: #bfa036;
     }
 
 @media (max-width: 576px) {
-    .form-label,
-    .login-root ::deep input.form-input,
-    .buttons-row {
-        width: 100%;
-    }
-
     .buttons-row {
         flex-direction: column;
-        gap: 0.5rem;
     }
 }

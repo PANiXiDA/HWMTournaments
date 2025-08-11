@@ -9,31 +9,46 @@ option csharp_namespace = "Gen.IdentityService.ApplicationUserService";
 
 service ApplicationUserService {
     rpc Get(GetApplicationUserRequest) returns (ApplicationUser);
+    rpc GetEmailConfirmationToken(GetEmailConfirmationTokenRequest) returns (GetEmailConfirmationTokenResponse);
     rpc GetByFilter(GetApplicationUsersRequest) returns (GetApplicationUsersResponse);
     rpc Create(ApplicationUser) returns (CreateApplicationUserResponse);
     rpc AddClaim (AddClaimRequest) returns (google.protobuf.Empty);
+    rpc ConfirmEmail(ConfirmEmailRequest) returns (google.protobuf.Empty);
     rpc Update(ApplicationUser) returns (google.protobuf.Empty);
     rpc Delete(DeleteApplicationUserRequest) returns (google.protobuf.Empty);
 }
 
 message GetApplicationUserRequest {
     int32 id = 1;
-    optional ApplicationUsersConvertParams application_users_convert_params = 2;
+    optional ApplicationUsersConvertParams convert_params = 2;
 }
 
 message GetApplicationUsersRequest {
-    ApplicationUsersSearchParams application_users_search_params = 1;
-    optional ApplicationUsersConvertParams application_users_convert_params = 2;
+    ApplicationUsersSearchParams search_params = 1;
+    optional ApplicationUsersConvertParams convert_params = 2;
 }
 
 message GetApplicationUsersResponse {
     repeated ApplicationUser application_users = 1;
 }
 
+message GetEmailConfirmationTokenRequest {
+    string email = 1;
+}
+
+message GetEmailConfirmationTokenResponse {
+    string token = 1;
+}
+
 message AddClaimRequest {
-  int32 application_user_id = 1;
-  string type  = 2;
-  string value = 3;
+    int32 id = 1;
+    string type  = 2;
+    string value = 3;
+}
+
+message ConfirmEmailRequest {
+    string email = 1;
+    string token = 2;
 }
 
 message DeleteApplicationUserRequest {
@@ -42,4 +57,5 @@ message DeleteApplicationUserRequest {
 
 message CreateApplicationUserResponse {
     int32 id = 1;
+    string email_confirmation_token = 2;
 }

@@ -9,5 +9,6 @@ namespace BL.Interfaces;
 
 public interface IUsersBL : ICrudBL<User, int, UsersSearchParams, UsersConvertParams>
 {
-    Task<int> RegistrationAsync(User entity);
+    Task EmailConfirmationAsync(string email);
+    Task ConfirmEmailAsync(string email, string token);
 }

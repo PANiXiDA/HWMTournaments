@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\Common\Common.Configuration.Mail\Common.Configuration.Mail.csproj" />
         <ProjectReference Include="..\..\Common\Common.Helpers\Common.Helpers.csproj" />
         <ProjectReference Include="..\..\DAL\DAL.Interfaces\DAL.Interfaces.csproj" />
         <ProjectReference Include="..\BL.Interfaces\BL.Interfaces.csproj" />

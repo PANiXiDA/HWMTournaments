@@ -8,6 +8,7 @@ using Common.SearchParams.Core;
 
 using DTOs.Core;
 using DTOs.Models;
+using DTOs.Requests;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,6 +54,16 @@ public sealed class UsersController : BaseApiController
         return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<SearchResult<UserDTO>>.Success(viewModel));
     }
 
+    [HttpGet]
+    [Route("confirm-email")]
+    [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<RestApiResponse<NoContent>>> ConfirmEmail([FromQuery] string email, [FromQuery] string token)
+    {
+        await _usersBL.ConfirmEmailAsync(email, token);
+        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<NoContent>.Success(new NoContent()));
+    }
+
     [HttpPost]
     [ProducesResponseType(typeof(RestApiResponse<int>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -61,6 +72,17 @@ public sealed class UsersController : BaseApiController
         var user = UsersMapper.DTOToEntity(request);
         request.Id = await _usersBL.AddOrUpdateAsync(user);
         return StatusCode(StatusCodes.Status201Created, RestApiResponseBuilder<int>.Success(request.Id));
+    }
+
+    [HttpPost]
+    [Route("registration")]
+    [ProducesResponseType(typeof(RestApiResponse<int>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<RestApiResponse<int>>> Registration([FromBody] RegistrationRequest request)
+    {
+        var user = UsersMapper.RegistrationRequestToEntity(request);
+        await _usersBL.AddOrUpdateAsync(user);
+        return StatusCode(StatusCodes.Status201Created, RestApiResponseBuilder<int>.Success(user.Id));
     }
 
     [HttpPut]
@@ -72,6 +94,16 @@ public sealed class UsersController : BaseApiController
         user.ApplicationUserId = User.GetApplicationUserId();
         user.ApplicationUser!.Id = User.GetApplicationUserId();
         await _usersBL.AddOrUpdateAsync(user);
+        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<NoContent>.Success(new NoContent()));
+    }
+
+    [HttpPatch]
+    [Route("email-confirmation")]
+    [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<RestApiResponse<NoContent>>> EmailConfirmation([FromBody] EmailConfirmationRequest request)
+    {
+        await _usersBL.EmailConfirmationAsync(request.Email);
         return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<NoContent>.Success(new NoContent()));
     }
 

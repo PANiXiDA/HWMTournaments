@@ -1,6 +1,8 @@
 ﻿@page "/register"
 
-<div class="registration-root">
+<div class="registration-card">
+    <h2 class="registration-title">Регистрация</h2>
+
     <EditForm Model="@_registrationRequest" OnValidSubmit="HandleRegistration" class="form-container">
         <DataAnnotationsValidator />
         <ValidationSummary class="validation-summary" />

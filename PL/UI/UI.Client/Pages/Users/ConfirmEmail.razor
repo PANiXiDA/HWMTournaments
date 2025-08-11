@@ -1,0 +1,38 @@
+﻿@page "/confirm-email"
+
+<main class="confirm-page">
+    @if (IsLoading)
+    {
+        <div class="state loading">
+            <div class="spinner" aria-hidden="true"></div>
+            <div class="title">Подтверждаем e-mail…</div>
+            <div class="subtitle">Пожалуйста, подождите.</div>
+        </div>
+    }
+    else if (IsSuccess)
+    {
+        <div class="state success">
+            <div class="glyph" aria-hidden="true">
+                <svg class="check" viewBox="0 0 48 28" role="img" aria-label="Успех">
+                    <path d="M12 24.5 L21 33.5 L36 14.5" fill="none" />
+                </svg>
+            </div>
+            <div class="title">E-mail подтверждён</div>
+            <div class="subtitle">
+                Аккаунт для <strong class="accent">@Email</strong> активирован.
+            </div>
+            <button class="btn" @onclick="GoLogin">Войти</button>
+        </div>
+    }
+    else
+    {
+        <div class="state error">
+            <div class="glyph error" aria-hidden="true"></div>
+            <div class="title">Не удалось подтвердить</div>
+            <div class="subtitle">@ErrorMessage</div>
+            <div class="actions">
+                <button class="btn" @onclick="GoHome">На главную</button>
+            </div>
+        </div>
+    }
+</main>

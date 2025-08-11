@@ -5,10 +5,6 @@
     @if (_visible)
     {
         <div class="toast show @(_current.IsError ? "bg-danger text-white" : "bg-success text-white")">
-            <div class="toast-header">
-                <strong class="me-auto">@(_current.IsError ? "Ошибка" : "Успех")</strong>
-                <button type="button" class="btn-close btn-close-white" @onclick="Hide"></button>
-            </div>
             <div class="toast-body">@_current.Message</div>
         </div>
     }

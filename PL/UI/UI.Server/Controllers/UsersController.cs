@@ -35,6 +35,17 @@ public sealed class UsersController : BaseApiController
     }
 
     [HttpGet]
+    [Authorize]
+    [ProducesResponseType(typeof(RestApiResponse<UserDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<RestApiResponse<UserDTO>>> Get([FromQuery] UsersConvertParams? convertParams)
+    {
+        var userId = User.GetUserId();
+        var response = UsersMapper.EntityToDto(await _usersBL.GetAsync(userId, convertParams));
+        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<UserDTO>.Success(response));
+    }
+
+    [HttpGet]
     [Route("{id:int}")]
     [ProducesResponseType(typeof(RestApiResponse<UserDTO>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status404NotFound)]
@@ -96,7 +107,7 @@ public sealed class UsersController : BaseApiController
     }
 
     [HttpPut]
-    [Authorize(Roles = $"{nameof(ApplicationUserRole.Developer)}")]
+    [Authorize]
     [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
     public async Task<ActionResult<RestApiResponse<NoContent>>> Update([FromBody] UserDTO request)
     {

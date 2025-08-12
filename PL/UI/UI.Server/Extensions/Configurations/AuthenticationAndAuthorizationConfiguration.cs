@@ -19,7 +19,7 @@ public static class AuthenticationAndAuthorizationConfiguration
             })
             .AddJwtBearer(options =>
             {
-                options.Authority = configuration.GetValue<string>(AppsettingsKeysConstants.IdentityServiceBaseAddress);
+                options.Authority = configuration.GetValue<string>("IndentityAuthority");
                 options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {

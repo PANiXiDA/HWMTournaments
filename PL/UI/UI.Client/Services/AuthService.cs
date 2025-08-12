@@ -27,7 +27,7 @@ public sealed class AuthService
 
     public async Task<(bool ok, string? error)> LoginAsync(string login, string password)
     {
-        var client = _httpFactory.CreateClient(ClientsConstants.IdentityService);
+        var client = _httpFactory.CreateClient(ClientsConstants.IdentityServiceClient);
 
         var form = new Dictionary<string, string?>
         {

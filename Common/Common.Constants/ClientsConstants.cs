@@ -2,5 +2,6 @@
 
 public static class ClientsConstants
 {
-    public const string IdentityService = "IdentityService";
+    public const string ServerAPIClient = "ServerAPI";
+    public const string IdentityServiceClient = "IdentityService";
 }

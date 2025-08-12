@@ -35,6 +35,7 @@ builder.Services.AddSwagger("hwm-tournaments-api");
 #endregion
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped(sp =>
 {
@@ -63,6 +64,7 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
 
 #region Custom Extensions
 

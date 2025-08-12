@@ -2,8 +2,8 @@
 
 namespace DTOs.Requests;
 
-public sealed class EmailConfirmationRequest
+public sealed class SendEmailConfirmationLinkRequest
 {
-    [Display(Name = "Логин")]
+    [Display(Name = "Почта")]
     public string Email { get; set; } = string.Empty;
 }

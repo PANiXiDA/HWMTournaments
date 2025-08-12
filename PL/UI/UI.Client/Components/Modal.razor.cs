@@ -180,7 +180,7 @@ public partial class Modal<TModel> : ComponentBase where TModel : class, new()
                 return;
             }
 
-            await CloseAsync(); // ждём закрытия
+            await CloseAsync();
             if (OnSuccess.HasDelegate)
                 await OnSuccess.InvokeAsync();
             else
@@ -202,7 +202,6 @@ public partial class Modal<TModel> : ComponentBase where TModel : class, new()
         {
             _closedTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             await IsOpenChanged.InvokeAsync(false);
-            // дождаться фактического закрытия и рендера
             await _closedTcs.Task;
         }
     }

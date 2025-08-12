@@ -29,12 +29,22 @@
     </EditForm>
 </div>
 
-<Modal TModel="EmailConfirmationRequest"
+<Modal TModel="SendEmailConfirmationLinkRequest"
        Title="Подтверждение e‑mail"
        SubmitText="Отправить"
        IsOpen="@_emailConfirmationModalOpen"
        IsOpenChanged="@(eventCallback => _emailConfirmationModalOpen = eventCallback)"
-       InitialModel="@_emailConfirmationRequest"
-       EndpointUrl="/api/v1/users/email-confirmation"
-       HttpMethod="PATCH"
-       OnSuccess="OnConfirmSuccess" />
+       InitialModel="@_sendEmailConfirmationLinkRequest"
+       EndpointUrl="/api/v1/users/send-email-confirmation-link"
+       HttpMethod="POST"
+       OnSuccess="OnSendEmailConfirmationLinkSuccess" />
+
+<Modal TModel="SendPasswordResetLinkRequest"
+       Title="Сброс пароля"
+       SubmitText="Отправить"
+       IsOpen="@_passwordResetModalOpen"
+       IsOpenChanged="@(eventCallback => _passwordResetModalOpen = eventCallback)"
+       InitialModel="@_sendPasswordResetLinkRequest"
+       EndpointUrl="/api/v1/users/send-password-reset-link"
+       HttpMethod="POST"
+       OnSuccess="OnSendPasswordResetLinkSuccess" />

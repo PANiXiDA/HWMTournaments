@@ -28,6 +28,7 @@ public sealed class UsersBL : IUsersBL
     private readonly IUsersDAL _usersDAL;
 
     private readonly string _confirmEmailUrl;
+    private readonly string _changePasswordUrl;
 
     public UsersBL(
         IConfiguration configuration,
@@ -42,6 +43,7 @@ public sealed class UsersBL : IUsersBL
         _usersDAL = usersDAL;
 
         _confirmEmailUrl = configuration.GetValue<string>("ConfirmEmailUrl") ?? throw new ArgumentException("ConfirmEmailUrl не задано в appsettings.json.");
+        _changePasswordUrl = configuration.GetValue<string>("ChangePasswordUrl") ?? throw new ArgumentException("ChangePasswordUrl не задано в appsettings.json.");
     }
 
     public Task<User> GetAsync(int id, UsersConvertParams? convertParams = null)
@@ -105,15 +107,26 @@ public sealed class UsersBL : IUsersBL
         return true;
     }
 
-    public async Task EmailConfirmationAsync(string email)
+    public async Task SendEmailConfirmationLinkAsync(string email)
     {
         var response = await _applicationUserServiceClient.GetEmailConfirmationTokenAsync(new GetEmailConfirmationTokenRequest { Email = email });
-        await SendEmailConfirmationAsync(email, response.Token);
+        await SendEmailConfirmationLinkToEmailAsync(email, response.Token);
     }
 
     public async Task ConfirmEmailAsync(string email, string token)
     {
         await _applicationUserServiceClient.ConfirmEmailAsync(new ConfirmEmailRequest { Email = email, Token = token });
+    }
+
+    public async Task SendPasswordResetLinkAsync(string email)
+    {
+        var response = await _applicationUserServiceClient.GetPasswordResetTokenAsync(new GetPasswordResetTokenRequest { Email = email });
+        await SendPasswordResetLinkToEmailAsync(email, response.Token);
+    }
+
+    public async Task ResetPasswordAsync(string email, string token, string newPassword)
+    {
+        await _applicationUserServiceClient.ResetPasswordAsync(new ResetPasswordRequest { Email = email, Token = token, NewPassword = newPassword });
     }
 
     private async Task CreateAsync(User entity)
@@ -131,7 +144,7 @@ public sealed class UsersBL : IUsersBL
                 Value = entity.Id.ToString()
             });
 
-        await SendEmailConfirmationAsync(entity.ApplicationUser!.Email, grpcResponse.EmailConfirmationToken);
+        await SendEmailConfirmationLinkToEmailAsync(entity.ApplicationUser!.Email, grpcResponse.EmailConfirmationToken);
     }
 
     private async Task UpdateAsync(User entity)
@@ -140,7 +153,7 @@ public sealed class UsersBL : IUsersBL
         await _usersDAL.AddOrUpdateAsync(entity);
     }
 
-    private async Task SendEmailConfirmationAsync(string email, string token)
+    private async Task SendEmailConfirmationLinkToEmailAsync(string email, string token)
     {
         var url = $"{_confirmEmailUrl}?email={email}&token={WebUtility.UrlEncode(token)}";
 
@@ -149,6 +162,23 @@ public sealed class UsersBL : IUsersBL
             <p>Здравствуйте!</p>
             <p>Для подтверждения почты перейдите по <a href=""{url}"">ссылке</a>.</p>
             <p>Если вы не регистрировались, просто игнорируйте это письмо.</p>";
+
+
+        await _emailSender.SendAsync(
+            recipients: new[] { email },
+            subject: subject,
+            htmlBody: body);
+    }
+
+    private async Task SendPasswordResetLinkToEmailAsync(string email, string token)
+    {
+        var url = $"{_changePasswordUrl}?email={email}&token={WebUtility.UrlEncode(token)}";
+
+        const string subject = "Смена пароля";
+        var body = $@"
+            <p>Здравствуйте!</p>
+            <p>Для смены пароля перейдите по <a href=""{url}"">ссылке</a>.</p>
+            <p>Если вы не запрашивали смену пароля, просто игнорируйте это письмо.</p>";
 
 
         await _emailSender.SendAsync(

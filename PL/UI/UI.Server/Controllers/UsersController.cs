@@ -54,16 +54,6 @@ public sealed class UsersController : BaseApiController
         return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<SearchResult<UserDTO>>.Success(viewModel));
     }
 
-    [HttpGet]
-    [Route("confirm-email")]
-    [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<RestApiResponse<NoContent>>> ConfirmEmail([FromQuery] string email, [FromQuery] string token)
-    {
-        await _usersBL.ConfirmEmailAsync(email, token);
-        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<NoContent>.Success(new NoContent()));
-    }
-
     [HttpPost]
     [ProducesResponseType(typeof(RestApiResponse<int>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -85,6 +75,26 @@ public sealed class UsersController : BaseApiController
         return StatusCode(StatusCodes.Status201Created, RestApiResponseBuilder<int>.Success(user.Id));
     }
 
+    [HttpPost]
+    [Route("send-email-confirmation-link")]
+    [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<RestApiResponse<NoContent>>> SendEmailConfirmationLink([FromBody] SendEmailConfirmationLinkRequest request)
+    {
+        await _usersBL.SendEmailConfirmationLinkAsync(request.Email);
+        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<NoContent>.Success(new NoContent()));
+    }
+
+    [HttpPost]
+    [Route("send-password-reset-link")]
+    [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<RestApiResponse<NoContent>>> SendPasswordResetLink([FromBody] SendPasswordResetLinkRequest request)
+    {
+        await _usersBL.SendPasswordResetLinkAsync(request.Email);
+        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<NoContent>.Success(new NoContent()));
+    }
+
     [HttpPut]
     [Authorize(Roles = $"{nameof(ApplicationUserRole.Developer)}")]
     [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
@@ -98,12 +108,22 @@ public sealed class UsersController : BaseApiController
     }
 
     [HttpPatch]
-    [Route("email-confirmation")]
+    [Route("confirm-email")]
     [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<RestApiResponse<NoContent>>> EmailConfirmation([FromBody] EmailConfirmationRequest request)
+    public async Task<ActionResult<RestApiResponse<NoContent>>> ConfirmEmail([FromBody] ConfirmEmailRequest request)
     {
-        await _usersBL.EmailConfirmationAsync(request.Email);
+        await _usersBL.ConfirmEmailAsync(request.Email, request.Token);
+        return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<NoContent>.Success(new NoContent()));
+    }
+
+    [HttpPatch]
+    [Route("reset-password")]
+    [ProducesResponseType(typeof(RestApiResponse<NoContent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RestApiResponse<object>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<RestApiResponse<NoContent>>> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        await _usersBL.ResetPasswordAsync(request.Email, request.Token, request.NewPassword);
         return StatusCode(StatusCodes.Status200OK, RestApiResponseBuilder<NoContent>.Success(new NoContent()));
     }
 

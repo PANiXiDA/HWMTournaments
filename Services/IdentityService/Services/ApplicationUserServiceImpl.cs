@@ -51,6 +51,17 @@ public class ApplicationUserServiceImpl : ApplicationUserService.ApplicationUser
         };
     }
 
+    public override async Task<GetPasswordResetTokenResponse> GetPasswordResetToken(GetPasswordResetTokenRequest request, ServerCallContext context)
+    {
+        var applicationUser = (await _userManager.FindByEmailAsync(request.Email))!;
+        var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(applicationUser);
+
+        return new GetPasswordResetTokenResponse()
+        {
+            Token = passwordResetToken,
+        };
+    }
+
     public override async Task<CreateApplicationUserResponse> Create(ApplicationUserProto request, ServerCallContext context)
     {
         var applicationUser = _mapper.Map<ApplicationUserDb>(request);
@@ -82,6 +93,14 @@ public class ApplicationUserServiceImpl : ApplicationUserService.ApplicationUser
     {
         var applicationUser = (await _userManager.FindByEmailAsync(request.Email))!;
         await _userManager.ConfirmEmailAsync(applicationUser, request.Token);
+
+        return new Empty();
+    }
+
+    public override async Task<Empty> ResetPassword(ResetPasswordRequest request, ServerCallContext context)
+    {
+        var applicationUser = (await _userManager.FindByEmailAsync(request.Email))!;
+        await _userManager.ResetPasswordAsync(applicationUser, request.Token, request.NewPassword);
 
         return new Empty();
     }

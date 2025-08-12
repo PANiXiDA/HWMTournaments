@@ -1,4 +1,8 @@
-﻿using Common.Helpers;
+﻿using System.Net.Http.Json;
+
+using Common.Helpers;
+
+using DTOs.Requests;
 
 using Microsoft.AspNetCore.Components;
 
@@ -29,10 +33,21 @@ public partial class ConfirmEmail : ComponentBase
 
         try
         {
-            var url = $"api/v1/users/confirm-email?email={Uri.EscapeDataString(Email!)}&token={Uri.EscapeDataString(Token!)}";
             Logger.LogInformation("Подтверждаем e-mail={Email}", Email);
 
-            var response = await Http.GetAsync(url);
+            var body = new ConfirmEmailRequest
+            {
+                Email = Email!,
+                Token = Token!
+            };
+
+            using var request = new HttpRequestMessage(new HttpMethod("PATCH"), "api/v1/users/confirm-email")
+            {
+                Content = JsonContent.Create(body)
+            };
+
+            var response = await Http.SendAsync(request);
+            var errorJson = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
@@ -40,14 +55,10 @@ public partial class ConfirmEmail : ComponentBase
             }
             else
             {
-                var errorJson = await response.Content.ReadAsStringAsync();
-                Logger.LogWarning("Ошибка подтверждения e-mail: {Error}", errorJson);
-
                 var detail = ApiErrorHelper.TryExtractDetail(errorJson);
                 ErrorMessage = string.IsNullOrWhiteSpace(detail)
                     ? $"Ошибка подтверждения (код {(int)response.StatusCode})."
                     : detail;
-
                 IsSuccess = false;
             }
         }

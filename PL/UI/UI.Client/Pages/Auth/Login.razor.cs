@@ -11,10 +11,13 @@ public partial class Login
     [Inject] private NotificationService Notifications { get; set; } = default!;
     [Inject] private AuthService Auth { get; set; } = default!;
 
+    private readonly LoginRequest _loginRequest = new();
+
+    private SendEmailConfirmationLinkRequest _sendEmailConfirmationLinkRequest = new();
     private bool _emailConfirmationModalOpen;
 
-    private readonly LoginRequest _loginRequest = new();
-    private EmailConfirmationRequest _emailConfirmationRequest = new();
+    private SendPasswordResetLinkRequest _sendPasswordResetLinkRequest = new();
+    private bool _passwordResetModalOpen;
 
     private async Task HandleLogin()
     {
@@ -40,19 +43,21 @@ public partial class Login
 
     private void ConfirmEmail()
     {
-        _emailConfirmationRequest = new EmailConfirmationRequest
-        {
-            Email = _loginRequest.Login
-        };
         _emailConfirmationModalOpen = true;
     }
-    private async Task ForgotPassword()
+
+    private void ForgotPassword()
     {
-        await Notifications.NotifyAsync("Переход на восстановление пароля...");
+        _passwordResetModalOpen = true;
     }
 
-    private async Task OnConfirmSuccess()
+    private async Task OnSendEmailConfirmationLinkSuccess()
     {
         await Notifications.NotifyAsync("Письмо для подтверждения отправлено. Проверьте почту.");
+    }
+
+    private async Task OnSendPasswordResetLinkSuccess()
+    {
+        await Notifications.NotifyAsync("Письмо для сброса пароля отправлено. Проверьте почту.");
     }
 }

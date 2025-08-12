@@ -10,10 +10,12 @@ option csharp_namespace = "Gen.IdentityService.ApplicationUserService";
 service ApplicationUserService {
     rpc Get(GetApplicationUserRequest) returns (ApplicationUser);
     rpc GetEmailConfirmationToken(GetEmailConfirmationTokenRequest) returns (GetEmailConfirmationTokenResponse);
+    rpc GetPasswordResetToken(GetPasswordResetTokenRequest) returns (GetPasswordResetTokenResponse);
     rpc GetByFilter(GetApplicationUsersRequest) returns (GetApplicationUsersResponse);
     rpc Create(ApplicationUser) returns (CreateApplicationUserResponse);
     rpc AddClaim (AddClaimRequest) returns (google.protobuf.Empty);
     rpc ConfirmEmail(ConfirmEmailRequest) returns (google.protobuf.Empty);
+    rpc ResetPassword(ResetPasswordRequest) returns (google.protobuf.Empty);
     rpc Update(ApplicationUser) returns (google.protobuf.Empty);
     rpc Delete(DeleteApplicationUserRequest) returns (google.protobuf.Empty);
 }
@@ -40,6 +42,14 @@ message GetEmailConfirmationTokenResponse {
     string token = 1;
 }
 
+message GetPasswordResetTokenRequest {
+    string email = 1;
+}
+
+message GetPasswordResetTokenResponse {
+    string token = 1;
+}
+
 message AddClaimRequest {
     int32 id = 1;
     string type  = 2;
@@ -49,6 +59,12 @@ message AddClaimRequest {
 message ConfirmEmailRequest {
     string email = 1;
     string token = 2;
+}
+
+message ResetPasswordRequest {
+    string email = 1;
+    string token = 2;
+    string new_password = 3;
 }
 
 message DeleteApplicationUserRequest {

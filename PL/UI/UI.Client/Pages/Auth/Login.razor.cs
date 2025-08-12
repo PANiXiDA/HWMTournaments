@@ -11,7 +11,10 @@ public partial class Login
     [Inject] private NotificationService Notifications { get; set; } = default!;
     [Inject] private AuthService Auth { get; set; } = default!;
 
+    private bool _emailConfirmationModalOpen;
+
     private readonly LoginRequest _loginRequest = new();
+    private EmailConfirmationRequest _emailConfirmationRequest = new();
 
     private async Task HandleLogin()
     {
@@ -23,7 +26,6 @@ public partial class Login
             if (ok)
             {
                 await Notifications.NotifyAsync("Вы успешно вошли!");
-                // TODO: при желании — редирект на главную/профиль
                 return;
             }
 
@@ -36,6 +38,21 @@ public partial class Login
         }
     }
 
-    private void ConfirmEmail() => Notifications.NotifyAsync("Переход на подтверждение почты...");
-    private void ForgotPassword() => Notifications.NotifyAsync("Переход на восстановление пароля...");
+    private void ConfirmEmail()
+    {
+        _emailConfirmationRequest = new EmailConfirmationRequest
+        {
+            Email = _loginRequest.Login
+        };
+        _emailConfirmationModalOpen = true;
+    }
+    private async Task ForgotPassword()
+    {
+        await Notifications.NotifyAsync("Переход на восстановление пароля...");
+    }
+
+    private async Task OnConfirmSuccess()
+    {
+        await Notifications.NotifyAsync("Письмо для подтверждения отправлено. Проверьте почту.");
+    }
 }

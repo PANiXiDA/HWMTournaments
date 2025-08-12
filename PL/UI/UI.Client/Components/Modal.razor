@@ -1,0 +1,114 @@
+﻿@typeparam TModel where TModel : class, new()
+
+<div class="modal-root">
+    @if (IsOpen)
+    {
+        <div class="modal-backdrop" @onclick="CloseAsync">
+            <div class="modal-window" role="dialog" aria-modal="true" @onclick:stopPropagation>
+                <button type="button" class="modal-close" aria-label="Закрыть" @onclick="CloseAsync">×</button>
+
+                @if (!string.IsNullOrWhiteSpace(Title))
+                {
+                    <h3 class="modal-title">@Title</h3>
+                }
+
+                @if (_mode == ModalMode.Info)
+                {
+                    <div class="modal-info">@((MarkupString)(InfoHtml ?? string.Empty))</div>
+                    <div class="modal-actions">
+                        <button type="button" class="action-button" @onclick="CloseAsync">Ок</button>
+                    </div>
+                }
+                else
+                {
+                    <EditForm Model="@_current" OnValidSubmit="HandleSubmit" class="modal-form">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="validation-summary" />
+
+                        <div class="modal-fields">
+                            @foreach (var property in _properties)
+                            {
+                                var label = property.GetCustomAttribute<DisplayAttribute>()?.Name ?? property.Name;
+                                var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
+                                <div class="modal-field">
+                                    <label class="form-label">@label</label>
+
+                                    @if (type == typeof(string))
+                                    {
+                                        var inputType = property.GetCustomAttribute<DataTypeAttribute>()?.DataType == DataType.Password
+                                        || property.Name.Contains("Password", StringComparison.OrdinalIgnoreCase)
+                                        ? "password" : "text";
+
+                                        <input class="form-input"
+                                               type="@inputType"
+                                               placeholder="@label…"
+                                               value="@GetString(property)"
+                                               @onchange="e => SetFromString(e, property)" />
+                                    }
+                                    else if (type.IsEnum)
+                                    {
+                                        <select class="form-input"
+                                                value="@GetString(property)"
+                                                @onchange="e => SetFromString(e, property)">
+                                            @foreach (Enum v in Enum.GetValues(type))
+                                            {
+                                                <option value="@v">@v.ToString()</option>
+                                            }
+                                        </select>
+                                    }
+                                    else if (type == typeof(bool))
+                                    {
+                                        var isChecked = (bool?)property.GetValue(_current) == true;
+                                        <input type="checkbox"
+                                               class="form-checkbox"
+                                               checked="@isChecked"
+                                               @onchange="e => SetFromBool(e, property)" />
+                                    }
+                                    else if (type == typeof(int) || type == typeof(long))
+                                    {
+                                        <input type="number"
+                                               step="1"
+                                               class="form-input"
+                                               placeholder="@label"
+                                               value="@GetString(property)"
+                                               @onchange="e => SetFromString(e, property)" />
+                                    }
+                                    else if (type == typeof(float) || type == typeof(double) || type == typeof(decimal))
+                                    {
+                                        <input type="number"
+                                               step="any"
+                                               class="form-input"
+                                               placeholder="@label"
+                                               value="@GetString(property)"
+                                               @onchange="e => SetFromString(e, property)" />
+                                    }
+                                    else if (type == typeof(DateTime))
+                                    {
+                                        <input type="datetime-local"
+                                               class="form-input"
+                                               value="@GetDateTimeLocal(property)"
+                                               @onchange="e => SetFromDateTimeLocal(e, property)" />
+                                    }
+                                    else
+                                    {
+                                        <input class="form-input"
+                                               placeholder="@label…"
+                                               value="@GetString(property)"
+                                               @onchange="e => SetFromString(e, property)" />
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="submit" class="action-button" disabled="@IsSubmitting">
+                                @(string.IsNullOrWhiteSpace(SubmitText) ? "Отправить" : SubmitText)
+                            </button>
+                        </div>
+                    </EditForm>
+                }
+            </div>
+        </div>
+    }
+</div>

@@ -115,5 +115,4 @@ public partial class Filter<TSearchParams> where TSearchParams : BaseSearchParam
         await SearchParamsChanged.InvokeAsync(SearchParams);
         await OnApplyFilters.InvokeAsync();
     }
-
 }

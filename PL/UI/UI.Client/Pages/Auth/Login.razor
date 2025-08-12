@@ -28,3 +28,13 @@
         </div>
     </EditForm>
 </div>
+
+<Modal TModel="EmailConfirmationRequest"
+       Title="Подтверждение e‑mail"
+       SubmitText="Отправить"
+       IsOpen="@_emailConfirmationModalOpen"
+       IsOpenChanged="@(eventCallback => _emailConfirmationModalOpen = eventCallback)"
+       InitialModel="@_emailConfirmationRequest"
+       EndpointUrl="/api/v1/users/email-confirmation"
+       HttpMethod="PATCH"
+       OnSuccess="OnConfirmSuccess" />

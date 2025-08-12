@@ -6,7 +6,7 @@ public interface ICrudBL<TEntity, TEntityId, TSearchParams, TConvertParams>
     where TEntity : class
     where TEntityId : notnull
     where TSearchParams : class
-    where TConvertParams : class, new()
+    where TConvertParams : class
 {
     Task<TEntity> GetAsync(TEntityId id, TConvertParams? convertParams = null);
     Task<SearchResult<TEntity>> GetAsync(TSearchParams searchParams, TConvertParams? convertParams = null);

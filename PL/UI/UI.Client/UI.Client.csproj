@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\Common\Common.ConvertParams\Common.ConvertParams.csproj" />
       <ProjectReference Include="..\..\..\Common\Common.Helpers\Common.Helpers.csproj" />
       <ProjectReference Include="..\..\..\Common\Common.SearchParams\Common.SearchParams.csproj" />
       <ProjectReference Include="..\..\..\Domain\DTOs\DTOs.csproj" />

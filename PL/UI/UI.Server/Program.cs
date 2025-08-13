@@ -40,12 +40,6 @@ builder.Services.AddSwagger("hwm-tournaments-api");
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddScoped(sp =>
-{
-    var nav = sp.GetRequiredService<NavigationManager>();
-    return new HttpClient { BaseAddress = new Uri(nav.BaseUri) };
-});
-
 var app = builder.Build();
 
 #region Middlewares

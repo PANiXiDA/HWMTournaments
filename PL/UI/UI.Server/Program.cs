@@ -1,12 +1,14 @@
 using Common.Configuration.Mail.DependencyInjection;
 
+using UI.Client.Clients.DependencyInjection;
+using UI.Client.Services.DependencyInjection;
+
 using BL.DependencyInjection;
 
 using DAL.DependencyInjection;
 
 using Microsoft.AspNetCore.Components;
 
-using UI.Client.Extensions;
 using UI.Server.Components;
 using UI.Server.Extensions.Configurations;
 using UI.Server.Middlewares;
@@ -27,6 +29,7 @@ builder.Services.UseDAL(builder.Configuration);
 builder.Services.UseBL();
 builder.Services.UseEmailSender(builder.Configuration);
 
+builder.Services.UseHttpClients(builder.Configuration);
 builder.Services.UseServices();
 
 builder.Services.AddAuthenticationAndAuthorization(builder.Configuration);

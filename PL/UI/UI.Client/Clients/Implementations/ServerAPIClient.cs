@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 using Common.Constants;
 
@@ -35,32 +36,35 @@ public sealed class ServerAPIClient : IServerAPIClient
         _notificationService = notifications;
     }
 
-    public async Task<TResponse?> GetAsync<TResponse>(string url, string? failMessage = null, CancellationToken cancellationToken = default)
+    public async Task<TResponse?> GetAsync<TResponse>(string url, string? successMessage = null, string? failMessage = null, CancellationToken cancellationToken = default)
     {
-        return await SendAsync<TResponse>(BuildJson(HttpMethod.Get, url), failMessage ?? "Не удалось загрузить данные.", cancellationToken);
+        return await SendAsync<TResponse>(BuildJson(HttpMethod.Get, url), successMessage ?? "Данные успешно получены.", failMessage ?? "Не удалось загрузить данные.", cancellationToken);
     }
 
-    public async Task<TResponse?> PostAsync<TRequest, TResponse>(string url, TRequest request, string? failMessage = null, CancellationToken cancellationToken = default)
+    public async Task<TResponse?> PostAsync<TRequest, TResponse>(string url, TRequest request, string? successMessage = null, string? failMessage = null, CancellationToken cancellationToken = default)
     {
-        return await SendAsync<TResponse>(BuildJson(HttpMethod.Post, url, request), failMessage ?? "Не удалось выполнить операцию.", cancellationToken);
+        return await SendAsync<TResponse>(BuildJson(HttpMethod.Post, url, request), successMessage ?? "Операция успешно выполнена.", failMessage ?? "Не удалось выполнить операцию.", cancellationToken);
     }
 
-    public async Task<TResponse?> PutAsync<TRequest, TResponse>(string url, TRequest request, string? failMessage = null, CancellationToken cancellationToken = default)
+    public async Task<TResponse?> PutAsync<TRequest, TResponse>(string url, TRequest request, string? successMessage = null, string? failMessage = null, CancellationToken cancellationToken = default)
     {
-        return await SendAsync<TResponse>(BuildJson(HttpMethod.Put, url, request), failMessage ?? "Не удалось сохранить изменения.", cancellationToken);
+        return await SendAsync<TResponse>(BuildJson(HttpMethod.Put, url, request), successMessage ?? "Изменения успешно сохранились.", failMessage ?? "Не удалось сохранить изменения.", cancellationToken);
     }
 
-    public async Task<TResponse?> PatchAsync<TRequest, TResponse>(string url, TRequest request, string? failMessage = null, CancellationToken cancellationToken = default)
+    public async Task<TResponse?> PatchAsync<TRequest, TResponse>(string url, TRequest request, string? successMessage = null, string? failMessage = null, CancellationToken cancellationToken = default)
     {
-        return await SendAsync<TResponse>(BuildJson(HttpMethod.Put, url, request), failMessage ?? "Не удалось сохранить изменения.", cancellationToken);
+        return await SendAsync<TResponse>(BuildJson(HttpMethod.Patch, url, request), successMessage ?? "Изменения успешно сохранились.", failMessage ?? "Не удалось сохранить изменения.", cancellationToken);
     }
 
-    public async Task<T?> DeleteAsync<T>(string url, string? failMessage = null, CancellationToken cancellationToken = default)
+    public async Task<T?> DeleteAsync<T>(string url, string? successMessage = null, string? failMessage = null, CancellationToken cancellationToken = default)
     {
-        return await SendAsync<T>(BuildJson(HttpMethod.Delete, url), failMessage ?? "Не удалось удалить.", cancellationToken);
+        return await SendAsync<T>(BuildJson(HttpMethod.Delete, url), successMessage ?? "Удаление прошло успешно.", failMessage ?? "Не удалось удалить.", cancellationToken);
     }
 
-    private HttpClient Create() => _httpClientFactory.CreateClient(ClientsConstants.ServerAPIClient);
+    private HttpClient Create()
+    {
+        return _httpClientFactory.CreateClient(ClientsConstants.ServerAPIClient);
+    }
 
     private static HttpRequestMessage BuildJson(HttpMethod method, string url, object? payload = null)
     {
@@ -75,7 +79,7 @@ public sealed class ServerAPIClient : IServerAPIClient
         return request;
     }
 
-    private async Task<TResponse?> SendAsync<TResponse>(HttpRequestMessage request, string failMessage, CancellationToken cancellationToken)
+    private async Task<TResponse?> SendAsync<TResponse>(HttpRequestMessage request, string successMessage, string failMessage, CancellationToken cancellationToken)
     {
         using var client = Create();
         using var response = await client.SendAsync(request, cancellationToken);
@@ -99,6 +103,10 @@ public sealed class ServerAPIClient : IServerAPIClient
                 }
                 if (restApiResponse is { Failure: null })
                 {
+                    if (request.Method != HttpMethod.Get)
+                    {
+                        await NotifySuccessAsync(successMessage);
+                    }
                     return restApiResponse.Payload;
                 }
 
@@ -138,8 +146,14 @@ public sealed class ServerAPIClient : IServerAPIClient
             var response = JsonSerializer.Deserialize<RestApiResponse<object>>(json, JsonSerializerOptions);
             if (response?.Failure?.Errors is { Count: > 0 })
             {
-                var first = response.Failure.Errors.Values.FirstOrDefault();
-                return string.IsNullOrWhiteSpace(first) ? null : first;
+                var firstError = response.Failure.Errors.Values.FirstOrDefault();
+                if (string.IsNullOrWhiteSpace(firstError))
+                {
+                    return null;
+                }
+
+                var match = Regex.Match(firstError, @"Detail\s*=\s*""([^""]+)""");
+                return match.Success ? match.Groups[1].Value : firstError;
             }
 
             return null;
@@ -147,6 +161,11 @@ public sealed class ServerAPIClient : IServerAPIClient
         catch { }
 
         return null;
+    }
+
+    private async Task NotifySuccessAsync(string message)
+    {
+        await _notificationService.NotifyAsync(message);
     }
 
     private async Task NotifyErrorAsync(string baseText, string detail)

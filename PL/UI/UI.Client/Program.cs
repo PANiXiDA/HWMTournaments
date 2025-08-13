@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 using UI.Client.Clients.DependencyInjection;
-using UI.Client.Extensions;
+using UI.Client.Services.DependencyInjection;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 

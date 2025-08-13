@@ -13,15 +13,17 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="name">@_registrationRequest.GetDisplayName(property => property.Email)</label>
+            <label class="form-label" for="email">@_registrationRequest.GetDisplayName(property => property.Email)</label>
             <InputText id="email" @bind-Value="_registrationRequest.Email" class="form-input" />
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="name">@_registrationRequest.GetDisplayName(property => property.Password)</label>
+            <label class="form-label" for="password">@_registrationRequest.GetDisplayName(property => property.Password)</label>
             <InputText id="password" @bind-Value="_registrationRequest.Password" type="password" class="form-input" />
         </div>
 
-        <button type="submit" class="submit-button">Зарегистрироваться</button>
+        <button type="submit" class="submit-button" disabled="@_isSubmitting">
+            @(_isSubmitting ? "Отправка…" : "Зарегистрироваться")
+        </button>
     </EditForm>
 </div>

@@ -8,6 +8,8 @@ using Common.Constants;
 
 using DTOs.Core;
 
+using Microsoft.AspNetCore.Components;
+
 using UI.Client.Clients.Interfaces;
 using UI.Client.Repositories.Interfaces;
 using UI.Client.Services.Interfaces;
@@ -18,6 +20,8 @@ public sealed class ServerAPIClient : IServerAPIClient
 {
     private readonly ILogger<ServerAPIClient> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
+
+    private readonly NavigationManager _navigationManager;
 
     private readonly IIndentityServiceClient _indentityServiceClient;
     private readonly IAccessTokenRepository _accessTokenRepository;
@@ -32,12 +36,15 @@ public sealed class ServerAPIClient : IServerAPIClient
     public ServerAPIClient(
         ILogger<ServerAPIClient> logger,
         IHttpClientFactory httpClientFactory,
+        NavigationManager navigationManager,
         IIndentityServiceClient indentityServiceClient,
         IAccessTokenRepository accessTokenRepository,
         INotificationsService notificationService)
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
+
+        _navigationManager = navigationManager;
 
         _indentityServiceClient = indentityServiceClient;
         _accessTokenRepository = accessTokenRepository;
@@ -140,10 +147,19 @@ public sealed class ServerAPIClient : IServerAPIClient
                 }
             }
 
-            if (status == HttpStatusCode.Unauthorized && attempt == 1)
+            if (status == HttpStatusCode.Unauthorized)
             {
-                await _indentityServiceClient.RefreshAsync(cancellationToken);
-                continue;
+                if (attempt == 1)
+                {
+                    await _indentityServiceClient.RefreshAsync(cancellationToken);
+                    continue;
+                }
+
+                await _accessTokenRepository.RemoveAsync(cancellationToken);
+                await _notificationService.NotifyAsync("Сессия истекла. Войдите снова.", true);
+                _navigationManager.NavigateTo("/login", forceLoad: true);
+
+                return default;
             }
 
             detail = TryExtractErrorDetail(json) ?? $"Ошибка запроса: {(int)status}.";

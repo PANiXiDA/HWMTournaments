@@ -1,36 +1,31 @@
 ﻿@page "/tournaments/create"
 @page "/tournaments/update/{TournamentId:int}"
-@using UI.Client.Services.Implementations
-@using UI.Client.Services.Interfaces
-@inject HttpClient Http
-@inject NavigationManager Navigation
-@inject INotificationsService NotificationsService
 
-<PageTitle>@(_isEdit ? "Редактировать турнир" : "Создать турнир")</PageTitle>
+<PageTitle>@(TournamentId.HasValue ? "Редактировать турнир" : "Создать турнир")</PageTitle>
 
 <h2 class="page-title">
-    @(_isEdit ? "Редактирование" : "Создание") турнира
+    @(TournamentId.HasValue ? "Редактирование" : "Создание") турнира
 </h2>
 
-<EditForm Model="_tournament" OnValidSubmit="HandleValidSubmit" FormName="TournamentForm">
+<EditForm Model="Tournament" OnValidSubmit="HandleCreateOrUpdateAsync" FormName="TournamentForm">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
     <div class="form-container">
 
-        <div class="form-group">
+        <div class="fTm-group">
             <label class="form-label">Название</label>
-            <InputText class="form-input" @bind-Value="_tournament.Name" />
+            <InputText class="form-input" @bind-Value="Tournament.Name" />
         </div>
 
         <div class="form-group">
             <label class="form-label">Дата начала</label>
-            <InputDate class="form-input" @bind-Value="_tournament.StartDate" />
+            <InputDate class="form-input" @bind-Value="Tournament.StartDate" />
         </div>
 
         <div class="form-group">
-            <label class="form-label">Формат</label>
-            <InputSelect class="form-input" @bind-Value="_tournament.Format">
+            <label Tass="form-label">Формат</label>
+            <InputSelect class="form-input" @bind-Value="Tournament.Format">
                 @foreach (var item in Enum.GetValues<TournamentFormat>())
                 {
                     <option value="@item">@item.GetDisplayName()</option>
@@ -40,7 +35,7 @@
 
         <div class="form-group">
             <label class="form-label">Сетка турнира</label>
-            <InputSelect class="form-input" @bind-Value="_tournament.GridType">
+            <InputSelect class="form-input" @bind-Value="Tournament.GridType">
                 @foreach (var item in Enum.GetValues<TournamentGridType>())
                 {
                     <option value="@item">@item.GetDisplayName()</option>
@@ -50,85 +45,31 @@
 
         <div class="form-group">
             <label class="form-label">
-                <InputCheckbox @bind-Value="_tournament.FactionsBan" />
+                <InputCheckbox @bind-Value="Tournament.FactionsBan" />
                 Запрет фракций
             </label>
         </div>
 
         <div class="form-group">
             <label class="form-label">Минимальный ELO</label>
-            <InputNumber class="form-input" @bind-Value="_tournament.MinimumElo" />
+            <InputNumber class="form-input" @bind-Value="Tournament.MinimumElo" />
         </div>
 
         <div class="form-group">
             <label class="form-label">Максимальный ELO</label>
-            <InputNumber class="form-input" @bind-Value="_tournament.MaximumElo" />
+            <InputNumber class="form-input" @bind-Value="Tournament.MaximumElo" />
         </div>
 
         <div class="form-group">
             <label class="form-label">Описание</label>
-            <InputTextArea class="form-input" @bind-Value="_tournament.Description" rows="4" />
+            <InputTextArea class="form-input" @bind-Value="Tournament.Description" rows="4" />T
         </div>
 
         <div class="form-actions">
             <button type="submit" class="btn btn-gold">
-                @(_isEdit ? "Сохранить" : "Создать")
+                @(TournamentId.HasValue ? "Сохранить" : "Создать")
             </button>
             <button type="button" class="btn btn-secondary" @onclick="Cancel">Отмена</button>
         </div>
     </div>
 </EditForm>
-
-@code {
-    [Parameter] 
-    public int? TournamentId { get; set; }
-
-    private TournamentDTO _tournament { get; set; } = new();
-    private bool _isEdit => TournamentId.HasValue;
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (_isEdit)
-        {
-            var response = await Http.GetFromJsonAsync<RestApiResponse<TournamentDTO>>($"api/v1/tournaments/{TournamentId}");
-            _tournament = response?.Payload ?? new TournamentDTO();
-        }
-        else
-        {
-            _tournament.StartDate = DateTime.UtcNow;
-        }
-    }
-
-    private async Task HandleValidSubmit()
-    {
-        _tournament.StartDate = DateTime.SpecifyKind(_tournament.StartDate, DateTimeKind.Utc);
-
-        try
-        {
-            int returnedId;
-            if (_isEdit)
-            {
-                var putResp = await Http.PutAsJsonAsync($"api/v1/tournaments/{TournamentId}", _tournament);
-                putResp.EnsureSuccessStatusCode();
-                returnedId = TournamentId!.Value;
-            }
-            else
-            {
-                var postResp = await Http.PostAsJsonAsync("api/v1/tournaments", _tournament);
-                postResp.EnsureSuccessStatusCode();
-                var wrapper = await postResp.Content.ReadFromJsonAsync<RestApiResponse<int>>();
-                returnedId = wrapper?.Payload ?? throw new InvalidOperationException("Не удалось получить ID");
-            }
-
-            Navigation.NavigateTo($"/tournaments/update/{returnedId}");
-
-            _ = NotificationsService.NotifyAsync(_isEdit ? "Турнир успешно сохранён" : "Турнир успешно создан", isError: false);
-        }
-        catch (Exception ex)
-        {
-            _ = NotificationsService.NotifyAsync($"Ошибка при сохранении: {ex.Message}", isError: true);
-        }
-    }
-
-    private void Cancel() => Navigation.NavigateTo("/tournaments");
-}

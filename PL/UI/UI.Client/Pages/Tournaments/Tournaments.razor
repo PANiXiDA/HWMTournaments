@@ -1,74 +1,65 @@
 ﻿@page "/tournaments"
-@inject HttpClient Http
 
 <PageTitle>Турниры</PageTitle>
 
-<h2 class="page-title">Список турниров</h2>
+<div class="tournaments-page">
+    <h2 class="page-title">Список турниров</h2>
 
-<div class="tournaments-actions">
-    <NavLink class="btn btn-gold" href="/tournaments/create">Создать турнир</NavLink>
-</div>
+    <div class="tournaments-actions">
+        <button class="btn btn-gold" @onclick="OnCreateTournament">Создать турнир</button>
+    </div>
 
-<Filter TSearchParams="Common.SearchParams.TournamentsSearchParams"
-        @bind-SearchParams="_searchParams"
-        OnApplyFilters="() => _pager!.ApplyFiltersAsync()" />
-
-@if (_searchResult is null)
-{
-    <p>Загрузка…</p>
-}
-else if (_searchResult.Objects.Count == 0)
-{
-    <p>Ничего не найдено.</p>
-}
-else
-{
-    <table class="tournament-table">
-        <thead>
-            <tr>
-                <th>Название</th>
-                <th>Дата</th>
-                <th>Формат</th>
-                <th>Минимальное эло</th>
-                <th>Максимальное эло</th>
-                <th>Действия</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var tournament in _searchResult.Objects)
-            {
-                <tr>
-                    <td>@tournament.Name</td>
-                    <td>@tournament.StartDate.ToString("dd.MM.yyyy")</td>
-                    <td>@tournament.Format.GetDisplayName()</td>
-                    <td>@tournament.MinimumElo</td>
-                    <td>@tournament.MaximumElo</td>
-                    <td class="actions-cell">
-                        <NavLink class="btn btn-secondary small" href="@($"/tournaments/update/{tournament.Id}")">Записаться на турнир</NavLink>
-                        <NavLink class="btn btn-secondary small" href="@($"/tournaments/update/{tournament.Id}")">Изменить</NavLink>
-                        <button class="btn btn-secondary small" @onclick="() => ConfirmDelete(tournament.Id)">Удалить</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-
-<Pagination TDTO="TournamentDTO"
-            TSearchParams="TournamentsSearchParams"
-            @ref="_pager"
-            ApiUrl="/api/v1/tournaments/get-by-filter"
+    <Filter TSearchParams="Common.SearchParams.TournamentsSearchParams"
             @bind-SearchParams="_searchParams"
-            @bind-SearchResult="_searchResult" />
+            OnApplyFilters="() => _pager!.ApplyFiltersAsync()" />
 
-@code {
-    private TournamentsSearchParams _searchParams = new() { Page = 1, ObjectsCount = 10 };
-    private SearchResult<TournamentDTO>? _searchResult;
-    private Pagination<TournamentDTO, TournamentsSearchParams>? _pager;
-
-    private async Task ConfirmDelete(int id)
+    @if (_searchResult is null)
     {
-        await Http.DeleteAsync($"api/v1/tournaments/{id}");
-        if (_pager is not null) await _pager.ApplyFiltersAsync();
+        <p>Загрузка…</p>
     }
-}
+    else if (_searchResult.Objects.Count == 0)
+    {
+        <p>Ничего не найдено.</p>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <table class="tournament-table">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Дата</th>
+                        <th>Формат</th>
+                        <th>Минимальное эло</th>
+                        <th>Максимальное эло</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tournament in _searchResult.Objects)
+                    {
+                        <tr>
+                            <td>@tournament.Name</td>
+                            <td>@tournament.StartDate.ToString("dd.MM.yyyy")</td>
+                            <td>@tournament.Format.GetDisplayName()</td>
+                            <td>@tournament.MinimumElo</td>
+                            <td>@tournament.MaximumElo</td>
+                            <td class="actions-cell">
+                                <NavLink class="btn btn-secondary small" href="@($"/tournaments/register/{tournament.Id}")">Записаться</NavLink>
+                                <NavLink class="btn btn-secondary small" href="@($"/tournaments/update/{tournament.Id}")">Изменить</NavLink>
+                                <button class="btn btn-secondary small" @onclick="() => DeleteAsync(tournament.Id)">Удалить</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <Pagination TDTO="DTOs.Models.TournamentDTO"
+                TSearchParams="Common.SearchParams.TournamentsSearchParams"
+                @ref="_pager"
+                Loader="LoadTournamentsAsync"
+                @bind-SearchParams="_searchParams"
+                @bind-SearchResult="_searchResult" />
+</div>

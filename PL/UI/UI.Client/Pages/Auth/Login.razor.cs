@@ -16,10 +16,10 @@ public partial class Login
 
     private readonly LoginRequest _loginRequest = new();
 
-    private SendEmailConfirmationLinkRequest _sendEmailConfirmationLinkRequest = new();
+    private readonly SendEmailConfirmationLinkRequest _sendEmailConfirmationLinkRequest = new();
     private bool _emailConfirmationModalOpen;
 
-    private SendPasswordResetLinkRequest _sendPasswordResetLinkRequest = new();
+    private readonly SendPasswordResetLinkRequest _sendPasswordResetLinkRequest = new();
     private bool _passwordResetModalOpen;
 
     private async Task HandleLogin()

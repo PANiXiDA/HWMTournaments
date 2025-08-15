@@ -5,7 +5,8 @@ using System.Reflection;
 using Common.Helpers;
 
 using Microsoft.AspNetCore.Components;
-using UI.Client.Services;
+
+using UI.Client.Services.Interfaces;
 
 namespace UI.Client.Components;
 
@@ -14,7 +15,7 @@ public enum ModalMode { Info, Form }
 public partial class Modal<TModel> : ComponentBase where TModel : class, new()
 {
     [Inject] private HttpClient Http { get; set; } = default!;
-    [Inject] private NotificationService Notifications { get; set; } = default!;
+    [Inject] private INotificationsService NotificationsService { get; set; } = default!;
 
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
@@ -152,7 +153,7 @@ public partial class Modal<TModel> : ComponentBase where TModel : class, new()
 
             if (string.IsNullOrWhiteSpace(EndpointUrl))
             {
-                await Notifications.NotifyAsync("Не задан EndpointUrl для модалки.", isError: true);
+                await NotificationsService.NotifyAsync("Не задан EndpointUrl для модалки.", isError: true);
                 return;
             }
 
@@ -176,7 +177,7 @@ public partial class Modal<TModel> : ComponentBase where TModel : class, new()
                 var message = string.IsNullOrWhiteSpace(detail)
                     ? "Запрос не выполнен. Проверьте данные и попробуйте ещё раз."
                     : $"Ошибка: {detail}";
-                await Notifications.NotifyAsync(message, isError: true);
+                await NotificationsService.NotifyAsync(message, isError: true);
                 return;
             }
 
@@ -184,11 +185,11 @@ public partial class Modal<TModel> : ComponentBase where TModel : class, new()
             if (OnSuccess.HasDelegate)
                 await OnSuccess.InvokeAsync();
             else
-                await Notifications.NotifyAsync("Успешно!");
+                await NotificationsService.NotifyAsync("Успешно!");
         }
         catch (Exception ex)
         {
-            await Notifications.NotifyAsync($"Произошла ошибка: {ex.Message}", isError: true);
+            await NotificationsService.NotifyAsync($"Произошла ошибка: {ex.Message}", isError: true);
         }
         finally
         {

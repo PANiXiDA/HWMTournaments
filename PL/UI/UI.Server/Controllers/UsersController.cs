@@ -1,7 +1,6 @@
 ﻿using BL.Interfaces;
 
 using Common.ConvertParams;
-using Common.Enums;
 using Common.Mappers;
 using Common.SearchParams;
 using Common.SearchParams.Core;

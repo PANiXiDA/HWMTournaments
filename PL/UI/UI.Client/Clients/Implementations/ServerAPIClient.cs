@@ -9,7 +9,8 @@ using Common.Constants;
 using DTOs.Core;
 
 using UI.Client.Clients.Interfaces;
-using UI.Client.Services;
+using UI.Client.Repositories.Interfaces;
+using UI.Client.Services.Interfaces;
 
 namespace UI.Client.Clients.Implementations;
 
@@ -18,7 +19,10 @@ public sealed class ServerAPIClient : IServerAPIClient
     private readonly ILogger<ServerAPIClient> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    private readonly NotificationService _notificationService;
+    private readonly IIndentityServiceClient _indentityServiceClient;
+    private readonly IAccessTokenRepository _accessTokenRepository;
+
+    private readonly INotificationsService _notificationService;
 
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
@@ -27,38 +31,43 @@ public sealed class ServerAPIClient : IServerAPIClient
 
     public ServerAPIClient(
         ILogger<ServerAPIClient> logger,
-        IHttpClientFactory httpFactory,
-        NotificationService notifications)
+        IHttpClientFactory httpClientFactory,
+        IIndentityServiceClient indentityServiceClient,
+        IAccessTokenRepository accessTokenRepository,
+        INotificationsService notificationService)
     {
         _logger = logger;
-        _httpClientFactory = httpFactory;
+        _httpClientFactory = httpClientFactory;
 
-        _notificationService = notifications;
+        _indentityServiceClient = indentityServiceClient;
+        _accessTokenRepository = accessTokenRepository;
+
+        _notificationService = notificationService;
     }
 
     public async Task<TResponse?> GetAsync<TResponse>(string url, string? successMessage = null, string? failMessage = null, CancellationToken cancellationToken = default)
     {
-        return await SendAsync<TResponse>(BuildJson(HttpMethod.Get, url), successMessage ?? "Данные успешно получены.", failMessage ?? "Не удалось загрузить данные.", cancellationToken);
+        return await SendAsync<TResponse>(() => BuildJson(HttpMethod.Get, url), successMessage ?? "Данные успешно получены.", failMessage ?? "Не удалось загрузить данные.", cancellationToken);
     }
 
     public async Task<TResponse?> PostAsync<TRequest, TResponse>(string url, TRequest request, string? successMessage = null, string? failMessage = null, CancellationToken cancellationToken = default)
     {
-        return await SendAsync<TResponse>(BuildJson(HttpMethod.Post, url, request), successMessage ?? "Операция успешно выполнена.", failMessage ?? "Не удалось выполнить операцию.", cancellationToken);
+        return await SendAsync<TResponse>(() => BuildJson(HttpMethod.Post, url, request), successMessage ?? "Операция успешно выполнена.", failMessage ?? "Не удалось выполнить операцию.", cancellationToken);
     }
 
     public async Task<TResponse?> PutAsync<TRequest, TResponse>(string url, TRequest request, string? successMessage = null, string? failMessage = null, CancellationToken cancellationToken = default)
     {
-        return await SendAsync<TResponse>(BuildJson(HttpMethod.Put, url, request), successMessage ?? "Изменения успешно сохранились.", failMessage ?? "Не удалось сохранить изменения.", cancellationToken);
+        return await SendAsync<TResponse>(() => BuildJson(HttpMethod.Put, url, request), successMessage ?? "Изменения успешно сохранились.", failMessage ?? "Не удалось сохранить изменения.", cancellationToken);
     }
 
     public async Task<TResponse?> PatchAsync<TRequest, TResponse>(string url, TRequest request, string? successMessage = null, string? failMessage = null, CancellationToken cancellationToken = default)
     {
-        return await SendAsync<TResponse>(BuildJson(HttpMethod.Patch, url, request), successMessage ?? "Изменения успешно сохранились.", failMessage ?? "Не удалось сохранить изменения.", cancellationToken);
+        return await SendAsync<TResponse>(() => BuildJson(HttpMethod.Patch, url, request), successMessage ?? "Изменения успешно сохранились.", failMessage ?? "Не удалось сохранить изменения.", cancellationToken);
     }
 
     public async Task<T?> DeleteAsync<T>(string url, string? successMessage = null, string? failMessage = null, CancellationToken cancellationToken = default)
     {
-        return await SendAsync<T>(BuildJson(HttpMethod.Delete, url), successMessage ?? "Удаление прошло успешно.", failMessage ?? "Не удалось удалить.", cancellationToken);
+        return await SendAsync<T>(() => BuildJson(HttpMethod.Delete, url), successMessage ?? "Удаление прошло успешно.", failMessage ?? "Не удалось удалить.", cancellationToken);
     }
 
     private HttpClient Create()
@@ -79,58 +88,85 @@ public sealed class ServerAPIClient : IServerAPIClient
         return request;
     }
 
-    private async Task<TResponse?> SendAsync<TResponse>(HttpRequestMessage request, string successMessage, string failMessage, CancellationToken cancellationToken)
+    private async Task<TResponse?> SendAsync<TResponse>(Func<HttpRequestMessage> requestFactory, string successMessage, string failMessage, CancellationToken cancellationToken)
     {
         using var client = Create();
-        using var response = await client.SendAsync(request, cancellationToken);
-        var status = response.StatusCode;
-        var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        if (response.IsSuccessStatusCode)
+        for (var attempt = 1; attempt <= 2; attempt++)
         {
-            if (status == HttpStatusCode.NoContent)
-            {
-                return default;
-            }
+            using var request = requestFactory();
+            await AttachAuthorizationAsync(request, cancellationToken);
 
-            try
-            {
-                var restApiResponse = JsonSerializer.Deserialize<RestApiResponse<TResponse>>(json, JsonSerializerOptions);
+            using var response = await client.SendAsync(request, cancellationToken);
+            var status = response.StatusCode;
+            var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
-                if (restApiResponse == null)
+            var detail = string.Empty;
+
+            if (response.IsSuccessStatusCode)
+            {
+                if (status == HttpStatusCode.NoContent)
                 {
                     return default;
                 }
-                if (restApiResponse is { Failure: null })
+
+                try
                 {
-                    if (request.Method != HttpMethod.Get)
+                    var restApiResponse = JsonSerializer.Deserialize<RestApiResponse<TResponse>>(json, JsonSerializerOptions);
+                    if (restApiResponse is null)
                     {
-                        await NotifySuccessAsync(successMessage);
+                        return default;
                     }
-                    return restApiResponse.Payload;
+
+                    if (restApiResponse.Failure is null)
+                    {
+                        if (request.Method != HttpMethod.Get)
+                        {
+                            await NotifySuccessAsync(successMessage);
+                        }
+                        return restApiResponse.Payload;
+                    }
+
+                    detail = TryExtractErrorDetail(json) ?? string.Empty;
+                    _logger.LogError("2xx, но Failure: {Detail}. Raw: {Json}", detail, json);
+                    await NotifyErrorAsync(failMessage, detail);
+                    return default;
                 }
-
-                var detail = TryExtractErrorDetail(json) ?? "Неизвестная ошибка ответа.";
-                _logger.LogError("2xx, но Failure: {Detail}. Raw: {Json}", detail, json);
-                await NotifyErrorAsync(failMessage, detail);
-
-                return default;
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Deserialize<RestApiResponse<{Type}>> failed. Raw: {Json}", typeof(TResponse).Name, json);
+                    await NotifyErrorAsync(failMessage, "Ошибка обработки ответа сервера.");
+                    return default;
+                }
             }
-            catch (Exception ex)
+
+            if (status == HttpStatusCode.Unauthorized && attempt == 1)
             {
-                _logger.LogError(ex, "Deserialize<RestApiResponse<{Type}>> failed. Raw: {Json}", typeof(TResponse).Name, json);
-                await NotifyErrorAsync(failMessage, "Ошибка обработки ответа сервера.");
-
-                return default;
+                await _indentityServiceClient.RefreshAsync(cancellationToken);
+                continue;
             }
-        }
-        else
-        {
-            var detail = TryExtractErrorDetail(json) ?? $"Ошибка запроса: {(int)status}.";
+
+            detail = TryExtractErrorDetail(json) ?? $"Ошибка запроса: {(int)status}.";
             _logger.LogError("{Method} {Url} failed: {Status} {Detail} Raw: {Json}", request.Method, request.RequestUri, status, detail, json);
             await NotifyErrorAsync(failMessage, detail);
-
             return default;
+        }
+
+        await NotifyErrorAsync(failMessage, string.Empty);
+        return default;
+    }
+
+    private async Task AttachAuthorizationAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        if (request.Headers.Authorization is not null)
+        {
+            return;
+        }
+
+        var accessToken = await _accessTokenRepository.GetAsync(cancellationToken);
+        if (!string.IsNullOrWhiteSpace(accessToken))
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         }
     }
 

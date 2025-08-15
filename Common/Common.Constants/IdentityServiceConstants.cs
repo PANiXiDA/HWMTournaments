@@ -6,11 +6,13 @@ public static class IdentityServiceConstants
     {
         public const string DevTemplateAspNetCoreAPIName = "hwm_tournaments_api";
         public const string DevTemplateAspNetCoreAPISecret = "hwm_tournaments_api_secret";
+        public const string OfflineAccess = "offline_access";
     }
 
     public static class GrantTypes
     {
         public const string Login = "login";
+        public const string Refresh = "refresh_token";
     }
 
     public static class Clients

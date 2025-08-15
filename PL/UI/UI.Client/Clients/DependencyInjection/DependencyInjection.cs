@@ -21,5 +21,6 @@ public static class DependencyInjection
             var baseAddress = configuration.GetValue<string>(AppsettingsKeysConstants.IdentityServiceHTTPBaseAddress) ?? throw new InvalidOperationException($"Не задана настройка '{AppsettingsKeysConstants.IdentityServiceHTTPBaseAddress}' в конфигурации.");
             client.BaseAddress = new Uri(baseAddress);
         });
+        services.AddScoped<IIndentityServiceClient, IndentityServiceClient>();
     }
 }

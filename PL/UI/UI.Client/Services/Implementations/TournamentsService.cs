@@ -31,27 +31,27 @@ public sealed class TournamentsService : ITournamentsService
     public async Task<TournamentDTO?> GetAsync(int id, TournamentsConvertParams? convertParams = null, CancellationToken cancellationToken = default)
     {
         var url = QueryStringHelper.Append($"{BaseEndpoint}/{id}", convertParams);
-        return await _serverAPIClient.GetAsync<TournamentDTO>(url, "Данные о турнире успешно получены.", "Не удалось получить турнир.", cancellationToken);
+        return await _serverAPIClient.GetAsync<TournamentDTO>(url, successMessage: "Данные о турнире успешно получены.", failMessage: "Не удалось получить турнир.", cancellationToken);
     }
 
     public async Task<SearchResult<TournamentDTO>?> GetAsync(TournamentsSearchParams searchParams, TournamentsConvertParams? convertParams = null, CancellationToken cancellationToken = default)
     {
         var url = QueryStringHelper.AppendMany($"{BaseEndpoint}/get-by-filter", searchParams, convertParams);
-        return await _serverAPIClient.GetAsync<SearchResult<TournamentDTO>>(url, "Список турниров успешно получен.", "Не удалось получить список турниров.", cancellationToken);
+        return await _serverAPIClient.GetAsync<SearchResult<TournamentDTO>>(url, successMessage: "Список турниров успешно получен.", failMessage: "Не удалось получить список турниров.", cancellationToken);
     }
 
     public async Task<int?> CreateAsync(TournamentDTO dto, CancellationToken cancellationToken = default)
     {
-        return await _serverAPIClient.PostAsync<TournamentDTO, int?>(BaseEndpoint, dto, "Турнир успешно создан.", "Не удалось создать турнир.", cancellationToken);
+        return await _serverAPIClient.PostAsync<TournamentDTO, int?>(BaseEndpoint, dto, successMessage: "Турнир успешно создан.", failMessage: "Не удалось создать турнир.", cancellationToken);
     }
 
     public async Task UpdateAsync(int id, TournamentDTO dto, CancellationToken cancellationToken = default)
     {
-        await _serverAPIClient.PutAsync<TournamentDTO, NoContent>($"{BaseEndpoint}/{id}", dto, "Турнир успешно сохранен.", "Не удалось сохранить турнир.", cancellationToken);
-    }
+        await _serverAPIClient.PutAsync<TournamentDTO, NoContent>($"{BaseEndpoint}/{id}", dto, successMessage: "Турнир успешно сохранен.", failMessage: "Не удалось сохранить турнир.", cancellationToken);
+    } 
 
     public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
-        await _serverAPIClient.DeleteAsync<NoContent>($"{BaseEndpoint}/{id}", "Турнир успешно удален.", "Не удалось удалить турнир.", cancellationToken);
+        await _serverAPIClient.DeleteAsync<NoContent>($"{BaseEndpoint}/{id}", successMessage: "Турнир успешно удален.", failMessage: "Не удалось удалить турнир.", cancellationToken);
     }
 }

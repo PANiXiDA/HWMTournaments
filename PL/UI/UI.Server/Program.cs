@@ -7,11 +7,10 @@ using BL.DependencyInjection;
 
 using DAL.DependencyInjection;
 
-using Microsoft.AspNetCore.Components;
-
 using UI.Server.Components;
 using UI.Server.Extensions.Configurations;
 using UI.Server.Middlewares;
+using UI.Client.Repositories.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +30,7 @@ builder.Services.UseEmailSender(builder.Configuration);
 
 builder.Services.UseHttpClients(builder.Configuration);
 builder.Services.UseServices();
+builder.Services.UseRepositories();
 
 builder.Services.AddAuthenticationAndAuthorization(builder.Configuration);
 builder.Services.AddSwagger("hwm-tournaments-api");

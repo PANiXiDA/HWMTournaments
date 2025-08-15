@@ -1,6 +1,8 @@
-﻿namespace UI.Client.Services;
+﻿using UI.Client.Services.Interfaces;
 
-public class NotificationService
+namespace UI.Client.Services.Implementations;
+
+public sealed class NotificationsService : INotificationsService
 {
     public event Func<NotificationMessage, Task>? OnNotify;
 
@@ -9,7 +11,10 @@ public class NotificationService
         var notificationMessage = new NotificationMessage { Message = message, IsError = isError };
 
         var handlers = OnNotify;
-        if (handlers is null) return Task.CompletedTask;
+        if (handlers is null)
+        {
+            return Task.CompletedTask;
+        }
 
         foreach (var @delegate in handlers.GetInvocationList())
         {
@@ -21,15 +26,12 @@ public class NotificationService
         return Task.CompletedTask;
     }
 
-    private static async Task SafeInvokeAsync(Func<NotificationMessage, Task> func, NotificationMessage message)
+    private static async Task SafeInvokeAsync(Func<NotificationMessage, Task> function, NotificationMessage message)
     {
-        try { await func(message); } catch { }
+        try 
+        { 
+            await function(message);
+        } 
+        catch { }
     }
-}
-
-
-public class NotificationMessage
-{
-    public string Message { get; set; } = default!;
-    public bool IsError { get; set; }
 }

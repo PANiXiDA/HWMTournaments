@@ -1,8 +1,10 @@
 ﻿@page "/tournaments/create"
 @page "/tournaments/update/{TournamentId:int}"
+@using UI.Client.Services.Implementations
+@using UI.Client.Services.Interfaces
 @inject HttpClient Http
 @inject NavigationManager Navigation
-@inject NotificationService Notifier
+@inject INotificationsService NotificationsService
 
 <PageTitle>@(_isEdit ? "Редактировать турнир" : "Создать турнир")</PageTitle>
 
@@ -120,11 +122,11 @@
 
             Navigation.NavigateTo($"/tournaments/update/{returnedId}");
 
-            _ = Notifier.NotifyAsync(_isEdit ? "Турнир успешно сохранён" : "Турнир успешно создан", isError: false);
+            _ = NotificationsService.NotifyAsync(_isEdit ? "Турнир успешно сохранён" : "Турнир успешно создан", isError: false);
         }
         catch (Exception ex)
         {
-            _ = Notifier.NotifyAsync($"Ошибка при сохранении: {ex.Message}", isError: true);
+            _ = NotificationsService.NotifyAsync($"Ошибка при сохранении: {ex.Message}", isError: true);
         }
     }
 

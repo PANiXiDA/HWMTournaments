@@ -7,9 +7,8 @@ public static class DependencyInjection
 {
     public static void UseServices(this IServiceCollection services)
     {
-        services.AddScoped<NotificationService>();
-        services.AddScoped<TokenService>();
-        services.AddScoped<AuthService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<INotificationsService, NotificationsService>();
 
         services.AddScoped<ITournamentsService, TournamentsService>();
         services.AddScoped<IUsersService, UsersService>();
